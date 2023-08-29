@@ -21,6 +21,7 @@ TESTS ::= [
 
 // From https://github.com/omichelsen/compare-versions/blob/main/test/compare.ts.
 
+// Single-segment versions are not valid semver, but we support them in comparisons.
 SINGLE_SEGMENT ::= [
   ["10", "9", 1],
   ["10", "10", 0],
@@ -28,6 +29,7 @@ SINGLE_SEGMENT ::= [
 
 ]
 
+// Double-segment versions are not valid semver, but we support them in comparisons.
 TWO_SEGMENT ::= [
   ["10.8", "10.4", 1],
   ["10.1", "10.1", 0],
@@ -42,6 +44,7 @@ THREE_SEGMENT ::= [
   ["11.0.2", "11.0.10", -1],
 ]
 
+// Four-segment versions are not valid semver, but we support them in comparisons.
 FOUR_SEGMENT ::= [
   ["1.0.0.0", "1", 0],
   ["1.0.0.0", "1.0", 0],
@@ -80,6 +83,7 @@ PRERELEASE ::= [
   ["1.0.0-beta.10", "1.0.0-beta.90", -1],
 ]
 
+// Leading 0 is not valid semver, but we support it in comparisons.
 LEADING_0 ::= [
   ["01.0.0", "1", 0],
   ["01.0.0", "1.0.0", 0],

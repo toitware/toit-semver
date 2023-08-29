@@ -4,6 +4,8 @@
 
 /**
 A semantic versioning library.
+
+See https://semver.org/ for details.
 */
 
 split_semver_ semver/string:
@@ -116,6 +118,81 @@ compare a/string b/string [--if_equal]:
   comp := compare_dotted_ a_prerelease b_prerelease
   if comp != 0: return comp
   return if_equal.call
+
+is_letter_ c/int -> bool:
+  return 'A' <= c <= 'Z' or 'a' <= c <= 'z'
+
+is_digit_ c/int -> bool:
+  return '0' <= c <= '9'
+
+is_non_digit_ c/int -> bool:
+  return c == '-' or is_letter_ c
+
+is_identifier_character_ c/int -> bool:
+  return is_digit_ c or is_non_digit_ c
+
+is_valid_build_ build/string -> bool:
+  parts := build.split "."
+  if parts.size == 0: return false
+  parts.do: | part/string |
+    if part.size == 0: return false
+    part.do:
+      if not is_identifier_character_ it: return false
+  return true
+
+is_valid_prerelease_ prerelease/string -> bool:
+  parts := prerelease.split "."
+  if parts.size == 0: return false
+  parts.do: | part/string |
+    if part.size == 0: return false
+    only_digits := true
+    // Either an alpha-num identifier, or a numeric identifier.
+    // Numeric identifiers must not have leading zeros.
+    part.do:
+      if not is_digit_ it: only_digits = false
+      if not is_identifier_character_ it: return false
+    if only_digits and part.size > 1 and part[0] == '0': return false
+  return true
+
+/**
+Returns true if $str is a valid semver string.
+
+If $allow_v is true, then the string may start with a 'v' or 'V'.
+If $require-major-minor-patch is true, then the string must have at least a
+  major, minor and patch version. Otherwise it is enough to have a major
+  version (or a major and minor version).
+*/
+is_valid str/string --allow_v/bool=true --require_major_minor_patch/bool=true -> bool:
+  if allow_v and (str.starts_with "v" or str.starts_with "V"):
+    str = str[1..]
+
+  build_index := str.index_of "+"
+  if build_index != -1:
+    build := str[build_index + 1..]
+    if not is_valid_build_ build: return false
+    str = str[..build_index]
+
+  prerelease_index := str.index_of "-"
+  if prerelease_index != -1:
+    prerelease := str[prerelease_index + 1..]
+    if not is_valid_prerelease_ prerelease: return false
+    str = str[..prerelease_index]
+
+  version_core := str
+
+  parts := version_core.split "."
+
+  if parts.size == 0: return false
+  if parts.size > 3: return false
+  if require_major_minor_patch and parts.size != 3: return false
+
+  parts.do: | part/string |
+    if part.size == 0: return false
+    part.do:
+      if not is_digit_ it: return false
+    if part.size > 1 and part[0] == '0': return false
+
+  return true
 
 /**
 Compares the semver strings $a and $b and returns true if $a < $b.
