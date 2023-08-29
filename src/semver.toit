@@ -82,9 +82,14 @@ Compares two semver strings.
 
 Returns -1 if $a < $b and 1 if $a > $b.
 If $a == $b, returns the result of calling $if_equal.
+
+Any leading 'v' or 'V' of $a or $b is stripped.
 */
 // See https://semver.org/#spec-item-11.
 compare a/string b/string [--if_equal]:
+  if a.starts_with "v" or a.starts_with "V": a = a[1..]
+  if b.starts_with "v" or b.starts_with "V": b = b[1..]
+
   // Split into version and prerelease.
   a_parts := split_semver_ a
   b_parts := split_semver_ b
@@ -111,3 +116,43 @@ compare a/string b/string [--if_equal]:
   comp := compare_dotted_ a_prerelease b_prerelease
   if comp != 0: return comp
   return if_equal.call
+
+/**
+Compares the semver strings $a and $b and returns true if $a < $b.
+
+This is a convenience function for `(compare a b) < 0`.
+*/
+is_less_than a/string b/string -> bool:
+  return (compare a b) < 0
+
+/**
+Compares the semver strings $a and $b and returns true if $a <= $b.
+
+This is a convenience function for `(compare a b) <= 0`.
+*/
+is_less_than_or_equal a/string b/string -> bool:
+  return (compare a b) <= 0
+
+/**
+Compares the semver strings $a and $b and returns true if $a == $b.
+
+This is a convenience function for `(compare a b) == 0`.
+*/
+equals a/string b/string -> bool:
+  return (compare a b) == 0
+
+/**
+Compares the semver strings $a and $b and returns true if $a > $b.
+
+This is a convenience function for `(compare a b) > 0`.
+*/
+is_greater_than a/string b/string -> bool:
+  return (compare a b) > 0
+
+/**
+Compares the semver strings $a and $b and returns true if $a >= $b.
+
+This is a convenience function for `(compare a b) >= 0`.
+*/
+is_greater_than_or_equal a/string b/string -> bool:
+  return (compare a b) >= 0
