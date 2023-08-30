@@ -135,7 +135,7 @@ is_valid_build_ build/string -> bool:
   parts := build.split "."
   if parts.size == 0: return false
   parts.do: | part/string |
-    if part.size == 0: return false
+    if part.is_empty: return false
     part.do:
       if not is_identifier_character_ it: return false
   return true
@@ -144,7 +144,7 @@ is_valid_prerelease_ prerelease/string -> bool:
   parts := prerelease.split "."
   if parts.size == 0: return false
   parts.do: | part/string |
-    if part.size == 0: return false
+    if part.is_empty: return false
     only_digits := true
     // Either an alpha-num identifier, or a numeric identifier.
     // Numeric identifiers must not have leading zeros.
@@ -187,7 +187,7 @@ is_valid str/string --allow_v/bool=true --require_major_minor_patch/bool=true ->
   if require_major_minor_patch and parts.size != 3: return false
 
   parts.do: | part/string |
-    if part.size == 0: return false
+    if part.is_empty: return false
     part.do:
       if not is_digit_ it: return false
     if part.size > 1 and part[0] == '0': return false
