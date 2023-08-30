@@ -149,5 +149,3 @@ test label/string tests/List:
 
     expect_equals expected (semver.compare a b)
     expect_equals -expected (semver.compare b a)
-
-    expect_equals -expected (semver.compare b a)
