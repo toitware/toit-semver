@@ -104,6 +104,7 @@ BUILD_METADATA ::= [
 main:
   test_spec_tests
   test_if_equal
+  test_leading_v
   test "single" SINGLE_SEGMENT
   test "two" TWO_SEGMENT
   test "three" THREE_SEGMENT
@@ -132,6 +133,13 @@ test_if_equal:
   expect_equals 1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if_equal=: 1)
   expect_equals 0 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if_equal=: 0)
   expect_equals -1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if_equal=: -1)
+
+test_leading_v:
+  expect_equals 0 (semver.compare "v1.0.0" "1.0.0")
+  expect_equals 0 (semver.compare "v1.0.0" "v1.0.0")
+
+  expect_equals 1 (semver.compare "v1.0.0" "0.0.0")
+  expect_equals 1 (semver.compare "v1.0.0" "v0.0.0")
 
 test label/string tests/List:
   tests.do: | entry/List |

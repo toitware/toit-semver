@@ -82,9 +82,14 @@ Compares two semver strings.
 
 Returns -1 if $a < $b and 1 if $a > $b.
 If $a == $b, returns the result of calling $if_equal.
+
+Any leading 'v' or 'V' of $a or $b is stripped.
 */
 // See https://semver.org/#spec-item-11.
 compare a/string b/string [--if_equal]:
+  if a.starts_with "v" or a.starts_with "V": a = a[1..]
+  if b.starts_with "v" or b.starts_with "V": b = b[1..]
+
   // Split into version and prerelease.
   a_parts := split_semver_ a
   b_parts := split_semver_ b
