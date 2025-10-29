@@ -22,7 +22,7 @@ TESTS ::= [
 // From https://github.com/omichelsen/compare-versions/blob/main/test/compare.ts.
 
 // Single-segment versions are not valid semver, but we support them in comparisons.
-SINGLE_SEGMENT ::= [
+SINGLE-SEGMENT ::= [
   ["10", "9", 1],
   ["10", "10", 0],
   ["9", "10", -1],
@@ -30,13 +30,13 @@ SINGLE_SEGMENT ::= [
 ]
 
 // Double-segment versions are not valid semver, but we support them in comparisons.
-TWO_SEGMENT ::= [
+TWO-SEGMENT ::= [
   ["10.8", "10.4", 1],
   ["10.1", "10.1", 0],
   ["10.1", "10.2", -1],
 ]
 
-THREE_SEGMENT ::= [
+THREE-SEGMENT ::= [
   ["10.1.8", "10.0.4", 1],
   ["10.0.1", "10.0.1", 0],
   ["10.1.1", "10.2.2", -1],
@@ -45,7 +45,7 @@ THREE_SEGMENT ::= [
 ]
 
 // Four-segment versions are not valid semver, but we support them in comparisons.
-FOUR_SEGMENT ::= [
+FOUR-SEGMENT ::= [
   ["1.0.0.0", "1", 0],
   ["1.0.0.0", "1.0", 0],
   ["1.0.0.0", "1.0.0", 0],
@@ -59,7 +59,7 @@ FOUR_SEGMENT ::= [
   ["1.0.0.0-alpha", "1.0.0.0-beta", -1]
 ]
 
-DIFFERENT_SEGMENT ::= [
+DIFFERENT-SEGMENT ::= [
   ["11.1.10", "11.0", 1],
   ["1.1.1", "1", 1],
   ["01.1.0", "1.01", 0],
@@ -84,7 +84,7 @@ PRERELEASE ::= [
 ]
 
 // Leading 0 is not valid semver, but we support it in comparisons.
-LEADING_0 ::= [
+LEADING-0 ::= [
   ["01.0.0", "1", 0],
   ["01.0.0", "1.0.0", 0],
   ["1.01.0", "1.01.0", 0],
@@ -93,7 +93,7 @@ LEADING_0 ::= [
   ["01.0.0", "2.0.0", -1],
 ]
 
-BUILD_METADATA ::= [
+BUILD-METADATA ::= [
   ["1.4.0-build.3928", "1.4.0-build.3928+sha.a8d9d4f", 0],
   ["1.4.0-build.3928+sha.b8dbdb0", "1.4.0-build.3928+sha.a8d9d4f", 0],
   ["1.0.0-alpha+001", "1.0.0-alpha", 0],
@@ -106,44 +106,44 @@ BUILD_METADATA ::= [
 ]
 
 main:
-  test_spec_tests
-  test_if_equal
-  test_leading_v
-  test "single" SINGLE_SEGMENT
-  test "two" TWO_SEGMENT
-  test "three" THREE_SEGMENT
-  test "four" FOUR_SEGMENT
-  test "different" DIFFERENT_SEGMENT
+  test-spec-tests
+  test-if-equal
+  test-leading-v
+  test "single" SINGLE-SEGMENT
+  test "two" TWO-SEGMENT
+  test "three" THREE-SEGMENT
+  test "four" FOUR-SEGMENT
+  test "different" DIFFERENT-SEGMENT
   test "prerelease" PRERELEASE
-  test "leading 0" LEADING_0
-  test "build metadata" BUILD_METADATA
+  test "leading 0" LEADING-0
+  test "build metadata" BUILD-METADATA
 
-test_spec_tests:
-  expect_equals 0 (semver.compare TESTS[0] TESTS[0])
+test-spec-tests:
+  expect-equals 0 (semver.compare TESTS[0] TESTS[0])
 
   for i := 1; i < TESTS.size; i++:
     a := TESTS[i - 1]
     b := TESTS[i]
 
-    expect_equals -1 (semver.compare a b)
-    expect_equals 1 (semver.compare b a)
-    expect_equals 0 (semver.compare b b)
+    expect-equals -1 (semver.compare a b)
+    expect-equals 1 (semver.compare b a)
+    expect-equals 0 (semver.compare b b)
 
-test_if_equal:
-  expect_equals 1 (semver.compare "1.0.0" "1.0.0" --if_equal=: 1)
-  expect_equals 0 (semver.compare "1.0.0" "1.0.0" --if_equal=: 0)
-  expect_equals -1 (semver.compare "1.0.0" "1.0.0" --if_equal=: -1)
+test-if-equal:
+  expect-equals 1 (semver.compare "1.0.0" "1.0.0" --if-equal=: 1)
+  expect-equals 0 (semver.compare "1.0.0" "1.0.0" --if-equal=: 0)
+  expect-equals -1 (semver.compare "1.0.0" "1.0.0" --if-equal=: -1)
 
-  expect_equals 1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if_equal=: 1)
-  expect_equals 0 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if_equal=: 0)
-  expect_equals -1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if_equal=: -1)
+  expect-equals 1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if-equal=: 1)
+  expect-equals 0 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if-equal=: 0)
+  expect-equals -1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if-equal=: -1)
 
-test_leading_v:
-  expect_equals 0 (semver.compare "v1.0.0" "1.0.0")
-  expect_equals 0 (semver.compare "v1.0.0" "v1.0.0")
+test-leading-v:
+  expect-equals 0 (semver.compare "v1.0.0" "1.0.0")
+  expect-equals 0 (semver.compare "v1.0.0" "v1.0.0")
 
-  expect_equals 1 (semver.compare "v1.0.0" "0.0.0")
-  expect_equals 1 (semver.compare "v1.0.0" "v0.0.0")
+  expect-equals 1 (semver.compare "v1.0.0" "0.0.0")
+  expect-equals 1 (semver.compare "v1.0.0" "v0.0.0")
 
 test label/string tests/List:
   tests.do: | entry/List |
@@ -151,5 +151,5 @@ test label/string tests/List:
     b := entry[1]
     expected := entry[2]
 
-    expect_equals expected (semver.compare a b)
-    expect_equals -expected (semver.compare b a)
+    expect-equals expected (semver.compare a b)
+    expect-equals -expected (semver.compare b a)
