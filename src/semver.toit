@@ -44,12 +44,12 @@ compare_dotted_ a/string b/string -> int:
     b_part := i < b_parts.size ? b_parts[i] : "0"
 
     a_not_int := false
-    a_part_int := int.parse a_part --on_error=:
+    a_part_int := int.parse a_part --if_error=:
       a_not_int = true
       -1
 
     b_not_int := false
-    b_part_int := int.parse b_part --on_error=:
+    b_part_int := int.parse b_part --if_error=:
       b_not_int = true
       -1
 
