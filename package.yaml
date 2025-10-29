@@ -1,2 +1,5 @@
 name: semver
 description: Semantic versioning.
+
+environment:
+  sdk: ^2.0.0-alpha.189
