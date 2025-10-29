@@ -8,4 +8,4 @@ import semver
 main:
   a := "1.0.0"
   b := "1.0.0-beta.1"
-  expect_equals 1 (semver.compare a b)
+  expect-equals 1 (semver.compare a b)

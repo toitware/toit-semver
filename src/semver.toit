@@ -8,18 +8,18 @@ A semantic versioning library.
 See https://semver.org/ for details.
 */
 
-split_semver_ semver/string:
-  plus_index := semver.index_of "+"
-  if plus_index != -1:
+split-semver_ semver/string:
+  plus-index := semver.index-of "+"
+  if plus-index != -1:
     // Drop the build metadata.
     // We don't need it for comparison.
-    semver = semver[..plus_index]
+    semver = semver[..plus-index]
 
   prerelease/string? := null
-  minus_index := semver.index_of "-"
-  if minus_index != -1:
-    prerelease = semver[minus_index + 1..]
-    semver = semver[..minus_index]
+  minus-index := semver.index-of "-"
+  if minus-index != -1:
+    prerelease = semver[minus-index + 1..]
+    semver = semver[..minus-index]
 
   return [semver, prerelease]
 
@@ -33,40 +33,40 @@ Generally, the rules are:
 - If both are integers compare them.
 - If both are strings compare them.
 */
-compare_dotted_ a/string b/string -> int:
-  a_parts := a.split "."
-  b_parts := b.split "."
+compare-dotted_ a/string b/string -> int:
+  a-parts := a.split "."
+  b-parts := b.split "."
 
-  max_parts := max a_parts.size b_parts.size
-  for i := 0; i < max_parts; i++:
+  max-parts := max a-parts.size b-parts.size
+  for i := 0; i < max-parts; i++:
     // If a part is missing it is considered to be equal to 0.
-    a_part := i < a_parts.size ? a_parts[i] : "0"
-    b_part := i < b_parts.size ? b_parts[i] : "0"
+    a-part := i < a-parts.size ? a-parts[i] : "0"
+    b-part := i < b-parts.size ? b-parts[i] : "0"
 
-    a_not_int := false
-    a_part_int := int.parse a_part --if_error=:
-      a_not_int = true
+    a-not-int := false
+    a-part-int := int.parse a-part --if-error=:
+      a-not-int = true
       -1
 
-    b_not_int := false
-    b_part_int := int.parse b_part --if_error=:
-      b_not_int = true
+    b-not-int := false
+    b-part-int := int.parse b-part --if-error=:
+      b-not-int = true
       -1
 
     // Semver requires major, minor and patch to be integers.
     // If we get something else we simply compare the two strings without
     // converting to a number.
-    if a_not_int and b_not_int:
-      comp := a_part.compare_to b_part
+    if a-not-int and b-not-int:
+      comp := a-part.compare-to b-part
       if comp != 0: return comp
     // If one is an integer and the other is not, the integer is lower.
-    else if a_not_int:
+    else if a-not-int:
       return 1
-    else if b_not_int:
+    else if b-not-int:
       return -1
     else:
       // If both are integers we compare them.
-      comp := a_part_int.compare_to b_part_int
+      comp := a-part-int.compare-to b-part-int
       if comp != 0: return comp
 
   return 0
@@ -77,119 +77,119 @@ Compares two semver strings.
 Returns -1 if $a < $b, 0 if $a == $b and 1 if $a > $b.
 */
 compare a/string b/string -> int:
-  return compare a b --if_equal=: 0
+  return compare a b --if-equal=: 0
 
 /**
 Compares two semver strings.
 
 Returns -1 if $a < $b and 1 if $a > $b.
-If $a == $b, returns the result of calling $if_equal.
+If $a == $b, returns the result of calling $if-equal.
 
 Any leading 'v' or 'V' of $a or $b is stripped.
 */
 // See https://semver.org/#spec-item-11.
-compare a/string b/string [--if_equal]:
-  if a.starts_with "v" or a.starts_with "V": a = a[1..]
-  if b.starts_with "v" or b.starts_with "V": b = b[1..]
+compare a/string b/string [--if-equal]:
+  if a.starts-with "v" or a.starts-with "V": a = a[1..]
+  if b.starts-with "v" or b.starts-with "V": b = b[1..]
 
   // Split into version and prerelease.
-  a_parts := split_semver_ a
-  b_parts := split_semver_ b
+  a-parts := split-semver_ a
+  b-parts := split-semver_ b
 
-  assert: a_parts.size == b_parts.size
-  assert: a_parts.size == 2
+  assert: a-parts.size == b-parts.size
+  assert: a-parts.size == 2
 
-  a_version := a_parts[0]
-  b_version := b_parts[0]
+  a-version := a-parts[0]
+  b-version := b-parts[0]
 
-  version_comp := compare_dotted_ a_version b_version
-  if version_comp != 0: return version_comp
+  version-comp := compare-dotted_ a-version b-version
+  if version-comp != 0: return version-comp
 
-  a_prerelease := a_parts[1]
-  b_prerelease := b_parts[1]
+  a-prerelease := a-parts[1]
+  b-prerelease := b-parts[1]
 
-  if not a_prerelease and not b_prerelease:
-    return if_equal.call
+  if not a-prerelease and not b-prerelease:
+    return if-equal.call
 
   // Any prerelease is lower than no prerelease.
-  if not a_prerelease: return 1
-  if not b_prerelease: return -1
+  if not a-prerelease: return 1
+  if not b-prerelease: return -1
 
-  comp := compare_dotted_ a_prerelease b_prerelease
+  comp := compare-dotted_ a-prerelease b-prerelease
   if comp != 0: return comp
-  return if_equal.call
+  return if-equal.call
 
-is_letter_ c/int -> bool:
+is-letter_ c/int -> bool:
   return 'A' <= c <= 'Z' or 'a' <= c <= 'z'
 
-is_digit_ c/int -> bool:
+is-digit_ c/int -> bool:
   return '0' <= c <= '9'
 
-is_non_digit_ c/int -> bool:
-  return c == '-' or is_letter_ c
+is-non-digit_ c/int -> bool:
+  return c == '-' or is-letter_ c
 
-is_identifier_character_ c/int -> bool:
-  return is_digit_ c or is_non_digit_ c
+is-identifier-character_ c/int -> bool:
+  return is-digit_ c or is-non-digit_ c
 
-is_valid_build_ build/string -> bool:
+is-valid-build_ build/string -> bool:
   parts := build.split "."
   if parts.size == 0: return false
   parts.do: | part/string |
-    if part.is_empty: return false
+    if part.is-empty: return false
     part.do:
-      if not is_identifier_character_ it: return false
+      if not is-identifier-character_ it: return false
   return true
 
-is_valid_prerelease_ prerelease/string -> bool:
+is-valid-prerelease_ prerelease/string -> bool:
   parts := prerelease.split "."
   if parts.size == 0: return false
   parts.do: | part/string |
-    if part.is_empty: return false
-    only_digits := true
+    if part.is-empty: return false
+    only-digits := true
     // Either an alpha-num identifier, or a numeric identifier.
     // Numeric identifiers must not have leading zeros.
     part.do:
-      if not is_digit_ it: only_digits = false
-      if not is_identifier_character_ it: return false
-    if only_digits and part.size > 1 and part[0] == '0': return false
+      if not is-digit_ it: only-digits = false
+      if not is-identifier-character_ it: return false
+    if only-digits and part.size > 1 and part[0] == '0': return false
   return true
 
 /**
 Returns true if $str is a valid semver string.
 
-If $allow_v is true, then the string may start with a 'v' or 'V'.
+If $allow-v is true, then the string may start with a 'v' or 'V'.
 If $require-major-minor-patch is true, then the string must have at least a
   major, minor and patch version. Otherwise it is enough to have a major
   version (or a major and minor version).
 */
-is_valid str/string --allow_v/bool=true --require_major_minor_patch/bool=true -> bool:
-  if allow_v and (str.starts_with "v" or str.starts_with "V"):
+is-valid str/string --allow-v/bool=true --require-major-minor-patch/bool=true -> bool:
+  if allow-v and (str.starts-with "v" or str.starts-with "V"):
     str = str[1..]
 
-  build_index := str.index_of "+"
-  if build_index != -1:
-    build := str[build_index + 1..]
-    if not is_valid_build_ build: return false
-    str = str[..build_index]
+  build-index := str.index-of "+"
+  if build-index != -1:
+    build := str[build-index + 1..]
+    if not is-valid-build_ build: return false
+    str = str[..build-index]
 
-  prerelease_index := str.index_of "-"
-  if prerelease_index != -1:
-    prerelease := str[prerelease_index + 1..]
-    if not is_valid_prerelease_ prerelease: return false
-    str = str[..prerelease_index]
+  prerelease-index := str.index-of "-"
+  if prerelease-index != -1:
+    prerelease := str[prerelease-index + 1..]
+    if not is-valid-prerelease_ prerelease: return false
+    str = str[..prerelease-index]
 
-  version_core := str
+  version-core := str
 
-  parts := version_core.split "."
+  parts := version-core.split "."
 
   if parts.size == 0: return false
   if parts.size > 3: return false
-  if require_major_minor_patch and parts.size != 3: return false
+  if require-major-minor-patch and parts.size != 3: return false
 
   parts.do: | part/string |
-    if part.is_empty: return false
+    if part.is-empty: return false
     part.do:
-      if not is_digit_ it: return false
+      if not is-digit_ it: return false
     if part.size > 1 and part[0] == '0': return false
 
   return true
