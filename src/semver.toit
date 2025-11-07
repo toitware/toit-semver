@@ -2,219 +2,14 @@
 // Use of this source code is governed by an MIT-style license that can be found
 // in the LICENSE file.
 
-/**
-A semantic versioning library.
+import encoding.yaml.parser
 
-See https://semver.org/ for details.
+/** Todo:
+- Decide with license to keep above
+- Decide what to do about 'import encoding.yaml.parser'
 */
 
-/**
-CHANGES:
-
-  1: start with original from
-  https://github.com/toitware/toit-semver
-
-  2: bring in object definition from
-  https://github.com/toitlang/toit/blob/master/tools/pkg/semantic-version.toit
-
-  3: bring in parser library from
-  https://github.com/toitlang/toit/blob/master/tools/pkg/parsers/semantic-version-parser.toit
-
-  4: Commit that as a point in time (combing all sources)
-
-  5. Start combing through, keeping the best of all three, and finish with a
-    single class, including comparison operators on the object, and strong
-    parsers (for strings, floats assuming maj.min (patch=000)).
-
-*/
-
-split-semver_ semver/string:
-  plus-index := semver.index-of "+"
-  if plus-index != -1:
-    // Drop the build metadata.
-    // We don't need it for comparison.
-    semver = semver[..plus-index]
-
-  prerelease/string? := null
-  minus-index := semver.index-of "-"
-  if minus-index != -1:
-    prerelease = semver[minus-index + 1..]
-    semver = semver[..minus-index]
-
-  return [semver, prerelease]
-
-/**
-Compares a dotted part of a semver string.
-
-This is used for major.minor.patch, but also for prerelease and build.
-
-Generally, the rules are:
-- If one is an integer and the other is not, the integer is lower.
-- If both are integers compare them.
-- If both are strings compare them.
-*/
-compare-dotted_ a/string b/string -> int:
-  a-parts := a.split "."
-  b-parts := b.split "."
-
-  max-parts := max a-parts.size b-parts.size
-  for i := 0; i < max-parts; i++:
-    // If a part is missing it is considered to be equal to 0.
-    a-part := i < a-parts.size ? a-parts[i] : "0"
-    b-part := i < b-parts.size ? b-parts[i] : "0"
-
-    a-not-int := false
-    a-part-int := int.parse a-part --if-error=:
-      a-not-int = true
-      -1
-
-    b-not-int := false
-    b-part-int := int.parse b-part --if-error=:
-      b-not-int = true
-      -1
-
-    // Semver requires major, minor and patch to be integers.
-    // If we get something else we simply compare the two strings without
-    // converting to a number.
-    if a-not-int and b-not-int:
-      comp := a-part.compare-to b-part
-      if comp != 0: return comp
-    // If one is an integer and the other is not, the integer is lower.
-    else if a-not-int:
-      return 1
-    else if b-not-int:
-      return -1
-    else:
-      // If both are integers we compare them.
-      comp := a-part-int.compare-to b-part-int
-      if comp != 0: return comp
-
-  return 0
-
-/**
-Compares two semver strings.
-
-Returns -1 if $a < $b, 0 if $a == $b and 1 if $a > $b.
-*/
-compare a/string b/string -> int:
-  return compare a b --if-equal=: 0
-
-/**
-Compares two semver strings.
-
-Returns -1 if $a < $b and 1 if $a > $b.
-If $a == $b, returns the result of calling $if-equal.
-
-Any leading 'v' or 'V' of $a or $b is stripped.
-*/
-// See https://semver.org/#spec-item-11.
-compare a/string b/string [--if-equal]:
-  if a.starts-with "v" or a.starts-with "V": a = a[1..]
-  if b.starts-with "v" or b.starts-with "V": b = b[1..]
-
-  // Split into version and prerelease.
-  a-parts := split-semver_ a
-  b-parts := split-semver_ b
-
-  assert: a-parts.size == b-parts.size
-  assert: a-parts.size == 2
-
-  a-version := a-parts[0]
-  b-version := b-parts[0]
-
-  version-comp := compare-dotted_ a-version b-version
-  if version-comp != 0: return version-comp
-
-  a-prerelease := a-parts[1]
-  b-prerelease := b-parts[1]
-
-  if not a-prerelease and not b-prerelease:
-    return if-equal.call
-
-  // Any prerelease is lower than no prerelease.
-  if not a-prerelease: return 1
-  if not b-prerelease: return -1
-
-  comp := compare-dotted_ a-prerelease b-prerelease
-  if comp != 0: return comp
-  return if-equal.call
-
-is-letter_ c/int -> bool:
-  return 'A' <= c <= 'Z' or 'a' <= c <= 'z'
-
-is-digit_ c/int -> bool:
-  return '0' <= c <= '9'
-
-is-non-digit_ c/int -> bool:
-  return c == '-' or is-letter_ c
-
-is-identifier-character_ c/int -> bool:
-  return is-digit_ c or is-non-digit_ c
-
-is-valid-build_ build/string -> bool:
-  parts := build.split "."
-  if parts.size == 0: return false
-  parts.do: | part/string |
-    if part.is-empty: return false
-    part.do:
-      if not is-identifier-character_ it: return false
-  return true
-
-is-valid-prerelease_ prerelease/string -> bool:
-  parts := prerelease.split "."
-  if parts.size == 0: return false
-  parts.do: | part/string |
-    if part.is-empty: return false
-    only-digits := true
-    // Either an alpha-num identifier, or a numeric identifier.
-    // Numeric identifiers must not have leading zeros.
-    part.do:
-      if not is-digit_ it: only-digits = false
-      if not is-identifier-character_ it: return false
-    if only-digits and part.size > 1 and part[0] == '0': return false
-  return true
-
-/**
-Returns true if $str is a valid semver string.
-
-If $allow-v is true, then the string may start with a 'v' or 'V'.
-If $require-major-minor-patch is true, then the string must have at least a
-  major, minor and patch version. Otherwise it is enough to have a major
-  version (or a major and minor version).
-*/
-is-valid str/string --allow-v/bool=true --require-major-minor-patch/bool=true -> bool:
-  if allow-v and (str.starts-with "v" or str.starts-with "V"):
-    str = str[1..]
-
-  build-index := str.index-of "+"
-  if build-index != -1:
-    build := str[build-index + 1..]
-    if not is-valid-build_ build: return false
-    str = str[..build-index]
-
-  prerelease-index := str.index-of "-"
-  if prerelease-index != -1:
-    prerelease := str[prerelease-index + 1..]
-    if not is-valid-prerelease_ prerelease: return false
-    str = str[..prerelease-index]
-
-  version-core := str
-
-  parts := version-core.split "."
-
-  if parts.size == 0: return false
-  if parts.size > 3: return false
-  if require-major-minor-patch and parts.size != 3: return false
-
-  parts.do: | part/string |
-    if part.is-empty: return false
-    part.do:
-      if not is-digit_ it: return false
-    if part.size > 1 and part[0] == '0': return false
-
-  return true
-
-
+// // From object library:
 // Copyright (C) 2024 Toitware ApS.
 //
 // This library is free software; you can redistribute it and/or
@@ -230,33 +25,74 @@ is-valid str/string --allow-v/bool=true --require-major-minor-patch/bool=true ->
 // The license can be found in the file `LICENSE` in the top level
 // directory of this repository.
 
-import .parsers.semantic-version-parser
 
-// TODO(florian): move this to the semver package.
+// // From parsing library:
+// Copyright (C) 2024 Toitware ApS.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; version
+// 2.1 only.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// The license can be found in the file `LICENSE` in the top level
+// directory of this repository.
 
-// See https://semver.org/.
+
+/**
+A semantic versioning library.
+
+See https://semver.org/ for details.
+*/
+
 class SemanticVersion:
+  PRERELEASE-DELIMITER/string := "-"
+  BUILD-DELIMITER/string := "+"
+
   // Identifiers are [major/int, minor/int, patch/int, (pre-release/int | pre-release/string)*].
-  major/int
-  minor/int
-  patch/int
-  pre-releases/List
-  build-numbers/List
+  _major/int
+  _minor/int
+  _patch/int
+  _pre-releases/List
+  _build-numbers/List
 
   static parse version/string -> SemanticVersion:
-    parsed := (SemanticVersionParser version).semantic-version --consume-all
-    return SemanticVersion.from-parse-result parsed
+    if version is string:
+      parsed := (SemanticVersionParser version).semantic-version --consume-all
+      return SemanticVersion.from-parse-result parsed
+    // Do we want this?  Maybe there are other types to put here
+    // if version is float:
+    //   handle a float
+    else:
+      throw "Don't know how to parse supplied object."
 
-  constructor --.major/int --.minor/int=0 --.patch/int=0 --.pre-releases/List=[] --.build-numbers/List=[]:
+  constructor --major/int --minor/int=0 --patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
+    _patch = patch
+    _pre-releases = pre-releases
+    _build-numbers = build-numbers
+    _minor = minor
+    _major = major
+
+  // Do we want a version like this?
+  constructor major/any minor/int=0 patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
+    _major = major
+    _minor = minor
+    _patch = patch
+    _pre-releases = pre-releases
+    _build-numbers = build-numbers
 
   constructor.from-parse-result parsed/SemanticVersionParseResult:
-    major = parsed.triple.triple[0]
-    minor = parsed.triple.triple[1]
-    patch = parsed.triple.triple[2]
-    pre-releases = parsed.pre-releases
-    build-numbers = parsed.build-numbers
+    _major = parsed.triple.triple[0]
+    _minor = parsed.triple.triple[1]
+    _patch = parsed.triple.triple[2]
+    _pre-releases = parsed.pre-releases
+    _build-numbers = parsed.build-numbers
 
-  triplet -> List: return [major, minor, patch]
+  triplet -> List: return [_major, _minor, _patch]
 
   static compare-lists-less-than_ l1/List l2/List:
     l1.size.repeat:
@@ -267,13 +103,13 @@ class SemanticVersion:
 
   operator < other/SemanticVersion -> bool:
     if compare-lists-less-than_ triplet other.triplet: return true
-    if compare-lists-less-than_ pre-releases other.pre-releases: return true
+    if compare-lists-less-than_ _pre-releases other._pre-releases: return true
     return false
 
   operator == other/SemanticVersion -> bool:
-    return triplet == other.triplet and pre-releases == other.pre-releases
+    return triplet == other.triplet and _pre-releases == other._pre-releases
 
-  operator >= other/SemanticVersion:
+  operator >= other/SemanticVersion -> bool:
     return not this < other
 
   operator <= other/SemanticVersion -> bool:
@@ -282,43 +118,277 @@ class SemanticVersion:
   operator > other/SemanticVersion -> bool:
     return not this <= other
 
-  compare-to other/SemanticVersion -> int:
-    if this < other: return -1
-    if this == other: return 0
-    return 1
+  compare-to other/any -> int:
+    if other is SemanticVersion:
+      if this < other: return -1
+      if this == other: return 0
+      return 1
+    else if other is string:
+      new-other := SemanticVersion.parse other
+      return compare-to new-other
+    else:
+      throw "Unhandled comparison object."
+      return 0
 
   to-string -> string:
-    str := "$major.$minor.$patch"
-    if not pre-releases.is-empty:
-      str += "-$(pre-releases.join ".")"
-    if not build-numbers.is-empty:
-      str += "+$(build-numbers.join ".")"
+    str := "$_major.$_minor.$_patch"
+    if not _pre-releases.is-empty:
+      str += "$PRERELEASE-DELIMITER$(_pre-releases.join ".")"
+    if not _build-numbers.is-empty:
+      str += "$BUILD-DELIMITER$(_build-numbers.join ".")"
     return str
 
   stringify -> string:
     return to-string
 
   hash-code:
-    return major + 1000 * minor + 1000000 * patch
+    return _major + 1000 * _minor + 1000000 * _patch
 
+  // Do we need to parse floats?  (helper for this)
+  parse-float_ input/float -> List:
+    if input < 0: input = -1 * input
+    major := input.to-int
+    minor := 0
+    if major < input:
+      input-string := input.stringify
+      dot-index := input-string.index-of "."
+      if dot-index != -1:
+        minor = int.parse input-string[dot-index..]
+    return [major, minor]
 
-// Copyright (C) 2024 Toitware ApS.
-//
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; version
-// 2.1 only.
-//
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Lesser General Public License for more details.
-//
-// The license can be found in the file `LICENSE` in the top level
-// directory of this repository.
+  // Text code had a method for comparing two arbitrary versions. This attempts
+  // to replicate that capability.  Could refine/replace compare-to to prevent
+  // having two similarly themed functions.  Or we dump and force user to handle
+  // ensuring one of them is already a SemanticVersion object.
+  compare input-a/any input-b/any?=null -> int:
+    semver-a/SemanticVersion := ?
+    semver-b/SemanticVersion := ?
 
-import encoding.yaml.parser
+    // Convert a if necessary. Assume parser handles all types.
+    if input-a is not SemanticVersion:
+      semver-a = SemanticVersion.parse input-a
+    else:
+      semver-a = input-a
 
+    // if input-b is null, compare to self, as per compare-to
+    if input-b == null:
+      return compare-to semver-a
+
+    // Convert b if necessary. Assume parser handles all types.
+    if input-b is not SemanticVersion:
+      semver-b = SemanticVersion.parse input-b
+    else:
+      semver-b = input-b
+
+    return input-a.compare-to input-b
+
+  // Don't know if this is required.
+  /**
+  Splits Semver information and Pre-release information.
+
+  Semver and Pre-release normally delimited by '-'. Build information (delimited
+    by '+') is removed, if present.  Appears to be used by text semver code only.
+  */
+  split-semver_
+      input/string
+      --pre-release-delimiter=PRERELEASE-DELIMITER
+      --build-delimiter=BUILD-DELIMITER:
+
+    build-index := input.index-of build-delimiter
+    if build-index != -1:
+      // Drop the build metadata.
+      // We don't need it for comparison.
+      input = input[..build-index]
+
+    pre-release-index := input.index-of pre-release-delimiter
+    if pre-release-index != -1:
+      semver := input[..pre-release-index]
+      pre-release := input[pre-release-index + 1..]
+      return [semver, pre-release]
+    else:
+      return [input, ""]
+
+  // Don't think we need this.  Going to test without.
+  /**
+  Compares two semver strings.
+
+  Returns -1 if $a < $b and 1 if $a > $b.
+  If $a == $b, returns the result of calling $if-equal.
+
+  Any leading 'v' or 'V' of $a or $b is stripped.
+
+  // See https://semver.org/#spec-item-11.
+  compare-text a/string b/string [--if-equal]:
+    if a.starts-with "v" or a.starts-with "V": a = a[1..]
+    if b.starts-with "v" or b.starts-with "V": b = b[1..]
+
+    // Split into version and prerelease.
+    a-parts := split-semver_ a
+    b-parts := split-semver_ b
+
+    assert: a-parts.size == b-parts.size
+    assert: a-parts.size == 2
+
+    a-version := a-parts[0]
+    b-version := b-parts[0]
+
+    version-comp := compare-dotted_ a-version b-version
+    if version-comp != 0: return version-comp
+
+    a-prerelease := a-parts[1]
+    b-prerelease := b-parts[1]
+
+    if not a-prerelease and not b-prerelease:
+      return if-equal.call
+
+    // Any prerelease is lower than no prerelease.
+    if not a-prerelease: return 1
+    if not b-prerelease: return -1
+
+    comp := compare-dotted_ a-prerelease b-prerelease
+    if comp != 0: return comp
+    return if-equal.call
+  */
+
+  // Going to test if this works needing to include this code.  Likely able to
+  // be done, will expose a function to test in the main class.
+  /**
+  Returns true if $str is a valid semver string.
+
+  If $allow-v is true, then the string may start with a 'v' or 'V'.
+  If $require-major-minor-patch is true, then the string must have at least a
+    major, minor and patch version. Otherwise it is enough to have a major
+    version (or a major and minor version).
+
+  is-valid str/string --allow-v/bool=true --require-major-minor-patch/bool=true -> bool:
+    if allow-v and (str.starts-with "v" or str.starts-with "V"):
+      str = str[1..]
+
+    build-index := str.index-of BUILD-DELIMITER
+    if build-index != -1:
+      build := str[build-index + 1..]
+      if not is-valid-build_ build: return false
+      str = str[..build-index]
+
+    prerelease-index := str.index-of PRERELEASE-DELIMITER
+    if prerelease-index != -1:
+      prerelease := str[prerelease-index + 1..]
+      if not is-valid-prerelease_ prerelease: return false
+      str = str[..prerelease-index]
+
+    version-core := str
+
+    parts := version-core.split "."
+
+    if parts.size == 0: return false
+    if parts.size > 3: return false
+    if require-major-minor-patch and parts.size != 3: return false
+
+    parts.do: | part/string |
+      if part.is-empty: return false
+      part.do:
+        if not is-digit_ it: return false
+      if part.size > 1 and part[0] == '0': return false
+
+    return true
+  */
+
+  // Don't think we need these now.  Going to test without.
+  /**
+  Compares a dotted part of a semver string.
+
+  This is used for major.minor.patch, but also for prerelease and build.
+
+  Generally, the rules are:
+  - If one is an integer and the other is not, the integer is lower.
+  - If both are integers compare them.
+  - If both are strings compare them.
+
+  compare-dotted_ a/string b/string -> int:
+    a-parts := a.split "."
+    b-parts := b.split "."
+
+    max-parts := max a-parts.size b-parts.size
+    for i := 0; i < max-parts; i++:
+      // If a part is missing it is considered to be equal to 0.
+      a-part := i < a-parts.size ? a-parts[i] : "0"
+      b-part := i < b-parts.size ? b-parts[i] : "0"
+
+      a-not-int := false
+      a-part-int := int.parse a-part --if-error=:
+        a-not-int = true
+        -1
+
+      b-not-int := false
+      b-part-int := int.parse b-part --if-error=:
+        b-not-int = true
+        -1
+
+      // Semver requires major, minor and patch to be integers.
+      // If we get something else we simply compare the two strings without
+      // converting to a number.
+      if a-not-int and b-not-int:
+        comp := a-part.compare-to b-part
+        if comp != 0: return comp
+      // If one is an integer and the other is not, the integer is lower.
+      else if a-not-int:
+        return 1
+      else if b-not-int:
+        return -1
+      else:
+        // If both are integers we compare them.
+        comp := a-part-int.compare-to b-part-int
+        if comp != 0: return comp
+
+    return 0
+  */
+
+  // Don't think we need these now.  Going to test without.
+  /**
+  Compares two semver strings.
+
+  Returns -1 if $a < $b, 0 if $a == $b and 1 if $a > $b.
+
+  compare-string a/string b/string -> int:
+    return compare-text a b --if-equal=: 0
+
+  is-letter_ c/int -> bool:
+    return 'A' <= c <= 'Z' or 'a' <= c <= 'z'
+
+  is-digit_ c/int -> bool:
+    return '0' <= c <= '9'
+
+  is-non-digit_ c/int -> bool:
+    return c == '-' or is-letter_ c
+
+  is-identifier-character_ c/int -> bool:
+    return is-digit_ c or is-non-digit_ c
+
+  is-valid-build_ build/string -> bool:
+    parts := build.split "."
+    if parts.size == 0: return false
+    parts.do: | part/string |
+      if part.is-empty: return false
+      part.do:
+        if not is-identifier-character_ it: return false
+    return true
+
+  is-valid-prerelease_ prerelease/string -> bool:
+    parts := prerelease.split "."
+    if parts.size == 0: return false
+    parts.do: | part/string |
+      if part.is-empty: return false
+      only-digits := true
+      // Either an alpha-num identifier, or a numeric identifier.
+      // Numeric identifiers must not have leading zeros.
+      part.do:
+        if not is-digit_ it: only-digits = false
+        if not is-identifier-character_ it: return false
+      if only-digits and part.size > 1 and part[0] == '0': return false
+    return true
+  */
+
+// Object to hold a 'version-core', pre-releases, build-numbers, and offset
 class SemanticVersionParseResult:
   triple/TripleParseResult
   pre-releases/List
@@ -327,6 +397,7 @@ class SemanticVersionParseResult:
 
   constructor .triple .pre-releases .build-numbers .offset:
 
+// Object to hold a 'version-core'
 class TripleParseResult:
   triple/List
   constructor major/int minor/int? patch/int?:
@@ -355,6 +426,7 @@ numeric ::= '0' | (digit - '0') digit *
 digit ::= [0-9]
 letter := [a-zA-Z]
 */
+
 class SemanticVersionParser extends parser.PegParserBase_:
   allow-missing-minor/bool
 
