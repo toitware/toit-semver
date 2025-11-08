@@ -1,4 +1,4 @@
-# Semantic versioning
+# Semantic Versioning Parser
 A package with an object and functions for semantic versioning, compliant with 'Semantic Versioning 2.0.0'.
 
 ## What is semver?
@@ -31,6 +31,8 @@ See: [semver.org](https://semver.org/).
 | a | pre-release | set of integers/strings, delimited by `.` | When present: - versions containing pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).  Eg: `1.0.0-alpha` < `1.0.0`. - A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. - Where strings and integers must be compared, strings have a higher precedence than integers. |
 | b | build metadata | set of integers/strings, delimited by `.` | MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
 
+See: [semver.org](https://semver.org/) for the complete reference.
+
 #### Examples
 | Example | Compliant? | Explanation | Parsing | Comparisons |
 | - | - | - | - | - |
@@ -42,34 +44,74 @@ See: [semver.org](https://semver.org/).
 |`1.0.0-beta`| Not strictly compliant | `pre-release` definition confusing - best to try `1.0.0-beta.1` | :green_circle: Parses successfully, and `prerelease="beta"` | :red_circle: ignores `pre-release` field. |
 | `1.0.0.1` | :red_circle: Not compliant | Uses four parts, last delimiter should be `-` | :green_circle: Maintains `pre-release=1` | :red_circle: ignores `pre-release` field. |
 
+See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
+
 
 ## Usage
 
-#### Use of the object
-#### Object instantiation, and comparison:
+#### Object instantiation and comparison:
 ```toit
 import semver show *
 
 main:
-  a := SemanticVersion "1.0.0"
-  b := SemanticVersion "1.0.0-beta.1"
+  // strings
+  a := "1.0.0"
+  b := "1.0.0-beta.1"
 
-  if a > b :
-    print "a is later than b"
+  // parse strings into SemanticVersion objects
+  a-semver := SemanticVersion.parse a
+  b-semver := SemanticVersion.parse b
 
-// Prints "a is later than b"
+  // compare two objects: prints "a is later than b."
+  if a-semver > b-semver:
+    print "a is later than b."
+  else:
+    print "b is later than a."
+
+  // compare two objects: prints "a and b are different."
+  if a-semver == b-semver:
+    print "a and b are the same."
+  else:
+    print "a and b are different."
+
+  // compare two objects: prints "a and a are the same."
+  if a-semver == a-semver:
+    print "a and a are the same."
+  else:
+    print "a and a are different."
+
 ```
 
-#### String compare:
+#### String comparisons using class parser:
 Implemented, but computationally expensive as string parsing happens every time the function is called:
 ```toit
-import semver
+import semver show *
 
 main:
-  a := "1.0.0"                // a is a string
-  b := "1.0.0-beta.1"         // b is a string
-  print (semver.compare a b)  // => 1
+  // strings
+  a := "1.0.0"
+  b := "1.0.0-beta.1"
+
+  // compare two strings: prints "Compare is: 1"
+  print "Compare is: $(compare a b)"
+
+  // compare two strings: prints "Compare is: -1"
+  print "Compare is: $(compare b a)"
+
+  // compare two strings: prints "Compare is: 0"
+  print "Compare is: $(compare a a)"
+
 ```
+
+## Parsing exceptions
+This library allows several modifications that would normally throw parsing errors:
+| Switch | Example | Notes |
+| - | - | - |
+| `--accept-missing-minor` | `1` | Would fail but this generates `1.0.0` |
+| `--accept-missing-patch` | `"1.2"` | Would fail but this generates `1.2.0` |
+| `--non-throwing` | `sss` | Would normally throw a breaking error, but this generates `null` |
+| `--accept-leading-zeros` | `1.2.03` | Would normally fail, but this generates `1.2.3` |
+| `--accept-v` | | `v1.2.3` | Would normally fail, but this generates `1.2.3` |
 
 
 ## Changes
@@ -77,7 +119,8 @@ main:
  2. Bring in object definition from [semantic-version.toit](https://github.com/toitlang/toit/blob/master/tools/pkg/semantic-version.toit)
  3. Bring in parser library from [semantic-version-parser.toit](https://github.com/toitlang/toit/blob/master/tools/pkg/parsers/semantic-version-parser.toit)
  4. Commit that as a point in time, combing all sources. (Commit 2405d0f)
- 5. Start combing through, keeping the best of all three
+ 5. Start combing through, keeping the best of all three.
+ 6. Try and maintain code compaibility
 
 #### Target:
 Finish with a single class/library, including comparison operators on the

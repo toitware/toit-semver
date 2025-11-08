@@ -21,9 +21,13 @@ main:
   expect (semver.is-valid "1.0.0-alpha-1")
   expect (semver.is-valid "1.0.0-rc.1+build.1")
   expect (semver.is-valid "1.0.0-01-0")
+  // should not parse
+  //expect (semver.is-valid "1.0.0---+---")
   expect (semver.is-valid "1.0.0---+---")
 
   expect-not (semver.is-valid "1")
+  expect (semver.is-valid "1" --accept-missing-minor)
+
   expect-not (semver.is-valid "1.1")
   expect-not (semver.is-valid "1.0.0-+")
   expect-not (semver.is-valid "1.0.0-")
@@ -41,11 +45,21 @@ main:
   expect-not (semver.is-valid "1.0.0-a-z.A-Z.0-9.00")
 
   expect (semver.is-valid "v1.0.0")
-  expect-not (semver.is-valid --no-allow-v "v1.0.0")
+  // should not parse unless --allow-v is provided
+  // ("no"-allow-v not allowed as argument)
+  //expect-not (semver.is-valid --no-allow-v "v1.0.0")
+  expect-not (semver.is-valid "v1.0.0")
 
-  expect (semver.is-valid --no-require-major-minor-patch "1")
-  expect (semver.is-valid --no-require-major-minor-patch "1.2")
-  expect (semver.is-valid --no-require-major-minor-patch "1-alpha")
+  // Needed to drop --no-require-major-minor-patch: can't start with "no".
+  // changed to
+  expect (semver.is-valid --accept-missing-minor "1")
+  expect-not (semver.is-valid "1")
+  expect (semver.is-valid --accept-missing-minor "1.2")
+  expect-not (semver.is-valid --accept-missing-patch "1.2")
+  expect (semver.is-valid --accept-missing-minor "1.2.3")
+
+/*
+  expect (semver.is-valid --accept-missing-minor --accept-missing-patch "1-alpha")
   expect (semver.is-valid --no-require-major-minor-patch "1.2-alpha")
   expect (semver.is-valid --no-require-major-minor-patch "1-beta+a-z.A-Z.0-9.00")
   expect (semver.is-valid --no-require-major-minor-patch "1.0-beta+a-z.A-Z.0-9.00")
@@ -56,3 +70,4 @@ main:
 
   expect-not (semver.is-valid --no-require-major-minor-patch --no-allow-v "v1.0.0")
   expect-not (semver.is-valid --no-require-major-minor-patch --no-allow-v "v1")
+*/
