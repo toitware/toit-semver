@@ -124,15 +124,3 @@ cause code to stop:
 | `--accept-leading-zeros` | `1.2.03`, `1.02.3`, `001.002.003` | Would normally fail, but this parses as `1.2.3` |
 | `--accept-v` | `v1.2.3` | Would normally fail, but this parses as `1.2.3` |
 
-
-## Changes
- 1. Start with original from [toitware/semver](https://github.com/toitware/toit-semver)
- 2. Bring in object definition from [semantic-version.toit](https://github.com/toitlang/toit/blob/master/tools/pkg/semantic-version.toit)
- 3. Bring in parser library from [semantic-version-parser.toit](https://github.com/toitlang/toit/blob/master/tools/pkg/parsers/semantic-version-parser.toit)
- 4. Commit that as a point in time, combing all sources. (Commit 2405d0f)
- 5. Start combing through, keeping the best of all three.
- 6. Try and maintain code compaibility
-
-#### Target:
-Finish with a single class/library, including comparison operators on the
-object, and strong parsers for strings (and floats, assuming maj.min, with patch=000).

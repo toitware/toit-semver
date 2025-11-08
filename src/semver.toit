@@ -6,7 +6,6 @@ import encoding.yaml.parser
 
 /** Todo:
 - Decide with license to keep above
-- Decide what to do about 'import encoding.yaml.parser'
 */
 
 // // From object library:
@@ -71,7 +70,6 @@ compare input-a/any input-b/any [--if-equal] -> int:
 
 compare input-a/any input-b/any -> int:
   return compare input-a input-b --if-equal=: 0
-
 
 /**
 A semantic versioning library.
