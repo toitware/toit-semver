@@ -22,16 +22,18 @@ A package with an object and functions for semantic versioning, compliant with '
 See: [semver.org](https://semver.org/).
 
 ## Format/Definition
-`x.y.z-a` where:
-| Token | Meaning | Type | Notes |
+`x.y.z-a+b` where:
+| Token | Name | Type | Notes |
 | - | - | - | - |
-| x | major | integer | Part of 'version-core'. |
-| y | minor | integer | Part of 'version-core'. |
-| z | patch | integer | Part of 'version-core'. |
-| a | pre-release | set of integers/strings, delimited by `.` | When present: - versions containing pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).  Eg: `1.0.0-alpha` < `1.0.0`. - A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. - Where strings and integers must be compared, strings have a higher precedence than integers. |
-| b | build metadata | set of integers/strings, delimited by `.` | MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
+| `x` | `major` | integer | Part of 'version-core'. |
+| `y` | `minor` | integer | Part of 'version-core'. |
+| `z` | `patch` | integer | Part of 'version-core'. |
+| `a` | `pre-release` | set of integers/strings, delimited by `.` | When present: - versions containing pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).  Eg: `1.0.0-alpha` < `1.0.0`. - A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. - Where strings and integers must be compared, strings have a higher precedence than integers. |
+| `b` | `build-metadata` | set of integers/strings, delimited by `.` | MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
 
-See: [semver.org](https://semver.org/) for the complete reference.
+There are more detailed rules around what characters are valid after certain
+others - please see: [semver.org](https://semver.org/) for the complete
+reference.
 
 #### Examples
 | Example | Compliant? | Explanation | Parsing | Comparisons |
@@ -103,8 +105,9 @@ main:
 
 ```
 
-## Parsing exceptions
-This library allows several modifications that would normally throw parsing errors:
+## Parsing Exceptions
+This library allows several modifications that would normally throw errors and
+cause code to stop:
 | Switch | Example | Notes |
 | - | - | - |
 | `--accept-missing-minor` | `1` | Would fail but this generates `1.0.0` |
