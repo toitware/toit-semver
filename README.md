@@ -49,7 +49,15 @@ reference.
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
 
-## Usage
+## Comparison Rules
+The [standard](https://semver.org/) dictates some rules that are not obvious at first:
+| Example | Rule |
+| - | - |
+| `1.2.3` > `1.2.3-beta` | A version with a pre-release tag is less than the same build number without the tag. |
+| `1.2.3-beta+abcd` = `1.2.3-beta` | Build-metadata is not to be used when comparing. |
+
+
+## Library Usage
 
 #### Object instantiation and comparison:
 ```toit
