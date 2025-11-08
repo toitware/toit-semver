@@ -95,13 +95,27 @@ Pre-release and build-metadata can also be specified directly:
 import semver show *
 
 main:
-  // Instantiation by direct creation
-  semver-a := SemanticVersion 1 0 0
+  // Direct instantiation.
+  semver-a := SemanticVersion 1 0 0 ["alpha",1] ["sha",23132]
 
-  // Prints 1.0.0
+  // Prints 1.0.0-alpha.1+sha.23132
   print "$semver-a"
 ```
+Since the object is immutable, editing one of the fields after creation is not
+possible.
+```toit
+import semver show *
 
+main:
+  // Direct instantiation.
+  semver-a := SemanticVersion 1 2 3 ["alpha",1] ["sha",23132]
+
+  // Prints 2
+  print "$(semver-a.minor)"
+
+  // Fails
+  semver-a.minor = 5
+```
 
 #### Object instantiation by string parsing:
 The library parses strings into a `SemanticVersion` object, which has methods
