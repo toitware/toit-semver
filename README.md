@@ -39,10 +39,10 @@ reference.
 | Example | Compliant? | Explanation | Possibility of parsing |
 | - | - | - | - |
 | `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. |
-| `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Parses successfully, but requires a switch. |
-| `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Successful parsing requires a switch. |
-| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yelow_circle: Leading `v` (or `V`) dropped when parsed.  Requires a switch. |
-| `v1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :yellow_circle: Leading `0` dropped while becoming an integer.  Requires a switch. |
+| `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Can parse, requires a switch. |
+| `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Can parse, requires a switch. |
+| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yelow_circle: Can be parsed using a switch - leading `v` (or `V`) dropped. |
+| `v1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :yellow_circle: Leading `0` dropped if switch provided. |
 |`1.0.0-beta`| Compliant | `pre-release` definition confusing - best to try `1.0.0-beta.1` | :green_circle: Parses successfully, and `prerelease="beta"` |
 | `1.0.0.1` | Not compliant | Uses four parts, last delimiter should be `-` or `+` | :red_circle: Parsing fails. |
 
