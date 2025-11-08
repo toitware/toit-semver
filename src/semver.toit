@@ -80,31 +80,34 @@ See https://semver.org/ for details.
 */
 
 class SemanticVersion:
-  // Identifiers are [major/int, minor/int, patch/int, (pre-release/int | pre-release/string)*].
   _major/int
   _minor/int
   _patch/int
   _pre-releases/List
   _build-numbers/List
 
-  // Changed to accept --accept-missing-minor
-  static parse version/string
+  // Changed to accept some extra switches and pass them to the parser
+  static parse input/any
       --accept-missing-minor=false
       --accept-missing-patch=false
       --non-throwing=false
       --accept-leading-zeros=false
       --accept-v=false
       -> SemanticVersion?:
-    if version is string:
-      parsed := (SemanticVersionParser version --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v).semantic-version --consume-all
-      if parsed == null:
-        return null
-      return SemanticVersion.from-parse-result parsed
-    // Do we want this?  Maybe there are other types to put here
-    // if version is float:
-    //   handle a float
+    version := ""
+    if input is float:
+      version = "$input"
+      accept-missing-patch = true
+      accept-missing-minor = true
+    if input is string:
+      version = input
     else:
       throw "Don't know how to parse supplied object."
+
+    parsed := (SemanticVersionParser version --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v).semantic-version --consume-all
+    if parsed == null:
+      return null
+    return SemanticVersion.from-parse-result parsed
 
   constructor --major/int --minor/int=0 --patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
     _patch = patch
@@ -113,7 +116,7 @@ class SemanticVersion:
     _minor = minor
     _major = major
 
-  // Do we want a version like this?
+  // Do we want/need a version like this?
   constructor major/any minor/int=0 patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
     _major = major
     _minor = minor
@@ -121,6 +124,7 @@ class SemanticVersion:
     _pre-releases = pre-releases
     _build-numbers = build-numbers
 
+  // Result returned from parser
   constructor.from-parse-result parsed/SemanticVersionParseResult:
     _major = parsed.triple.triple[0]
     _minor = parsed.triple.triple[1]
@@ -142,6 +146,9 @@ class SemanticVersion:
     if compare-lists-less-than_ _pre-releases other._pre-releases: return true
     return false
 
+  operator > other/SemanticVersion -> bool:
+    return not this <= other
+
   operator == other/SemanticVersion -> bool:
     return triplet == other.triplet and _pre-releases == other._pre-releases
 
@@ -151,8 +158,11 @@ class SemanticVersion:
   operator <= other/SemanticVersion -> bool:
     return this < other or this == other
 
-  operator > other/SemanticVersion -> bool:
-    return not this <= other
+  major -> int: return _major
+  minor -> int: return _minor
+  patch -> int: return _patch
+  pre-releases -> List: return _pre-releases
+  build-numbers -> List: return _build-numbers
 
   compare-to other/any -> int:
     if other is SemanticVersion:
@@ -206,8 +216,7 @@ class SemanticVersion:
     return [major, minor]
 
 // Object to pass entire 'version-core', including pre-releases,
-// build-numbers, and offset value from parser
-//
+// build-numbers, and offset value from parsers
 // Added stringify/is-valid only to help troubleshooting
 class SemanticVersionParseResult:
   triple/TripleParseResult?
