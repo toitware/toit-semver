@@ -35,16 +35,16 @@ There are more detailed rules around what characters are valid after certain
 others - please see: [semver.org](https://semver.org/) for the complete
 reference.
 
-#### Examples
-| Example | Compliant? | Explanation | Parsing | Comparisons |
-| - | - | - | - | - |
-| `1.2.3`| :check: Compliant | As per definition | :green_circle: As is | :green_circle: |
-| `1.2` | Not strictly compliant | Missed `patch` | :green_circle: Parses successfully, but assumes `patch=0` | :green_circle: |
-| `1` | Not strictly compliant | Misses `minor` and `patch` | :green_circle: Assumes successfully but assumes `minor=0` and `patch=0` | :green_circle: |
-| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :green_circle: Leading `v` (or `V`) dropped when parsed. | :green_circle: |
-| `v1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :green_circle: Leading `0` dropped while becoming an integer. | :green_circle: |
-|`1.0.0-beta`| Not strictly compliant | `pre-release` definition confusing - best to try `1.0.0-beta.1` | :green_circle: Parses successfully, and `prerelease="beta"` | :red_circle: ignores `pre-release` field. |
-| `1.0.0.1` | :red_circle: Not compliant | Uses four parts, last delimiter should be `-` | :green_circle: Maintains `pre-release=1` | :red_circle: ignores `pre-release` field. |
+## Parsing Examples
+| Example | Compliant? | Explanation | Parsing |
+| - | - | - | - |
+| `1.2.3`| :green_circle: Compliant | As per definition | :green_circle: As is |
+| `1.2` | Not strictly compliant | Missed `patch` | :green_circle: Parses successfully, but assumes `patch=0` |
+| `1` | Not strictly compliant | Misses `minor` and `patch` | :green_circle: Assumes successfully but assumes `minor=0` and `patch=0` |
+| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :green_circle: Leading `v` (or `V`) dropped when parsed. |
+| `v1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :green_circle: Leading `0` dropped while becoming an integer. |
+|`1.0.0-beta`| :green_circle: Compliant | `pre-release` definition confusing - best to try `1.0.0-beta.1` | :green_circle: Parses successfully, and `prerelease="beta"` |
+| `1.0.0.1` | :red_circle: Not compliant | Uses four parts, last delimiter should be `-` or `+` | :green_circle: Maintains `pre-release=1` |
 
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
