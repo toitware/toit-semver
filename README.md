@@ -145,7 +145,7 @@ main:
     print "a and b are different."
 
   // compare two objects: prints "a and a are the same."
-  if semver-a == semver-b:
+  if semver-a == semver-a:
     print "a and a are the same."
   else:
     print "a and a are different."
