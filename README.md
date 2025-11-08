@@ -116,11 +116,10 @@ main:
 ## Parsing Exceptions
 This library allows several modifications that would normally throw errors and
 cause code to stop:
-| Switch | Examples | Notes |
-| - | - | - |
-| `--accept-missing-minor` | `1` | Would normally throw a breaking error, but this will parse as `1.0.0` |
-| `--accept-missing-patch` | `"1.2"` | Would normally throw a breaking error, but this will parse as `1.2.0` |
-| `--non-throwing` | `1.2.a`, `1.a.3` | Would normally throw a breaking error.  These generate `null`. |
-| `--accept-leading-zeros` | `1.2.03`, `1.02.3`, `001.002.003` | Would normally fail, but this parses as `1.2.3` |
-| `--accept-v` | `v1.2.3` | Would normally fail, but this parses as `1.2.3` |
-
+| Switch | Examples using the switch |
+| - | - |
+| `--accept-missing-minor` | `1` will parse as `1.0.0`.  (Also assumes `--accept-missing-patch`) `1.2` will fail without the next switch. |
+| `--accept-missing-patch` | `1.2` will parse as `1.2.0` |
+| `--accept-leading-zeros` | `1.2.03`, `1.02.3`, `001.002.003` will all parse as `1.2.3` |
+| `--accept-v` | `v1.2.3` parses as `1.2.3` |
+| `--non-throwing` | `1.2.a`, `1.a.3`, and any other failures generate `null` instead of throwing. |
