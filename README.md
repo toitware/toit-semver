@@ -44,7 +44,7 @@ reference.
 | `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :green_circle: Leading `v` (or `V`) dropped when parsed. |
 | `v1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :green_circle: Leading `0` dropped while becoming an integer. |
 |`1.0.0-beta`| :green_circle: Compliant | `pre-release` definition confusing - best to try `1.0.0-beta.1` | :green_circle: Parses successfully, and `prerelease="beta"` |
-| `1.0.0.1` | :red_circle: Not compliant | Uses four parts, last delimiter should be `-` or `+` | :green_circle: Maintains `pre-release=1` |
+| `1.0.0.1` | :red_circle: Not compliant | Uses four parts, last delimiter should be `-` or `+` | :red_circle: Parsing fails. |
 
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
