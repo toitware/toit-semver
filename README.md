@@ -41,7 +41,9 @@ Examples of what can be seen in practical use:
 - `2.1.0-beta+exp.sha.5114f85`: This would denotes a beta build, and gives build
   metadata, likely showing a specific experiment/commit.
 
-## Parsing Examples
+## Parsing
+One way to create a `SemanticVersion` object is to have the library parse a
+string.  Parsing operates as shown in the table below:
 | Example | Compliant? | Explanation | Parsing Result |
 | - | - | - | - |
 | `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. |
@@ -56,7 +58,7 @@ See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder an
 
 
 ## Comparison Rules
-The [standard](https://semver.org/) dictates rules about comparisons.  Not all are obvious at first:
+The library implements code to support the normal logic operators, such as `>`,  `<=`, etc. The [standard](https://semver.org/) dictates rules about these.  Not all are obvious at first.  They operate in the following way:
 | Example | Explanation |
 | - | - |
 | `1.2.3` > `1.2.1` | As expected. |
