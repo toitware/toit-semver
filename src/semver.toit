@@ -9,6 +9,7 @@ import encoding.yaml.parser
 - We could probably lose the 'TripleParseResult' as it adds no value, combining
   it into SemanticVersionParseResult.
 - Decide on PEG description (Old and new are both down by the parser class)
+- Evaluate tests - new test doesn't use expect, not sure of consequence.
 */
 
 // // From object library:
