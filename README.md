@@ -33,7 +33,7 @@ There are more detailed rules around what characters are valid after certain
 others - please see: [semver.org](https://semver.org/) for the complete
 reference.
 
-## Semver Examples
+### Formatting Examples
 Examples of what can be seen in practical use:
 - `0.0.0`: First official release — stable interface guaranteed moving forward.
 - `3.0.0-alpha.1`: This would refer to unstable alpha version of v3.0.0. ".1"
