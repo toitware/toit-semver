@@ -5,7 +5,10 @@
 import encoding.yaml.parser
 
 /** Todo:
-- Decide with license to keep above
+- Decide with license to keep
+- We could probably lose the 'TripleParseResult' as it adds no value, combining
+  it into SemanticVersionParseResult.
+- Decide on PEG description (Old and new are both down by the parser class)
 */
 
 // // From object library:
@@ -68,6 +71,7 @@ compare input-a/any input-b/any [--if-equal] -> int:
   else:
     return 0
 
+// Text code had a method for executing a block, for two arbitrary versions.
 compare input-a/any input-b/any -> int:
   return compare input-a input-b --if-equal=: 0
 
@@ -163,18 +167,25 @@ class SemanticVersion:
   build-numbers -> List: return _build-numbers
 
   compare-to other/any -> int:
+    return compare-to other --if-equal=: 0
+
+  // Text code had a method for executing a block, for two arbitrary versions.
+  compare-to other/any [--if-equal] -> int:
     if other is SemanticVersion:
       if this < other: return -1
-      if this == other: return 0
+      if this == other: if-equal.call
       return 1
     else if other is string:
       new-other := SemanticVersion.parse other
-      return compare-to new-other
+      return compare-to new-other --if-equal=if-equal
     else:
       throw "Unhandled comparison object."
       return 0
 
   stringify -> string:
+    return to-string
+
+  to-string -> string:
     str := "$_major.$_minor.$_patch"
     if not _pre-releases.is-empty:
       str += "-$(_pre-releases.join ".")"
@@ -183,35 +194,25 @@ class SemanticVersion:
     return str
 
   to-string-list -> List:
-    output := []
+    output/List := []
+    count/int := ?
     output.add " major:$_major"
     output.add " minor:$_minor"
     output.add " patch:$_patch"
     if not _pre-releases.is-empty:
+      count = 0
       _pre-releases.do:
-        output.add " pre-releases: $it"
+        count += 1
+        output.add " pre-release[$count]: $it"
     if not _build-numbers.is-empty:
+      count = 0
       _build-numbers.do:
-        output.add " build-numbers: $it"
+        count += 1
+        output.add " build-number[$count]: $it"
     return output
-
-  to-string -> string:
-    return stringify
 
   hash-code:
     return _major + 1000 * _minor + 1000000 * _patch
-
-  // Do we need to parse floats?  (helper for this)
-  parse-float_ input/float -> List:
-    if input < 0: input = -1 * input
-    major := input.to-int
-    minor := 0
-    if major < input:
-      input-string := input.stringify
-      dot-index := input-string.index-of "."
-      if dot-index != -1:
-        minor = int.parse input-string[dot-index..]
-    return [major, minor]
 
 // Object to pass entire 'version-core', including pre-releases,
 // build-numbers, and offset value from parsers
@@ -277,6 +278,82 @@ non-digit ::= '-' | letter
 numeric ::= '0' | (digit - '0') digit *
 digit ::= [0-9]
 letter := [a-zA-Z]
+*/
+
+/**
+UPDATED PEG GRAMMAR (strict) to this code and switches exactly, not the spec.
+
+SEMVER
+  = V-PREFIX? CORE PRE? BUILD? !.
+  /  // when soft mode is used, null is likely returned instead of throwing
+    // but structurally this is the grammar.
+
+V-PREFIX
+  =  // [--accept-v]
+    ('v' / 'V')
+
+CORE
+  = CORE-STRICT
+  / CORE-MISSING-MINOR        // [--accept-missing-minor]
+  / CORE-MISSING-PATCH        // [--accept-missing-patch]
+
+CORE-STRICT
+  = INT-NZ '.' INT-NZ '.' INT-NZ
+
+CORE-MISSING-MINOR
+  = INT-NZ                     // implies MINOR=0, PATCH=0
+  / INT-NZ '.' INT-NZ          // implies PATCH=0
+  // Exact defaults depend on your implementation:
+  // - If no '.' after MAJOR: treat as MAJOR.0.0
+  // - If one '.': treat as MAJOR.MINOR.0
+  // You already implement this policy inside version-core.
+
+CORE-MISSING-PATCH
+  = INT-NZ '.' INT-NZ          // implies PATCH=0
+  // This variant should only be considered when
+  // accept-missing-minor == false and accept-missing-patch == true,
+  // i.e. MAJOR.MINOR is allowed but MAJOR alone is not.
+
+PRE
+  = '-' PR-ID ('.' PR-ID)*
+
+BUILD
+  = '+' BUILD-ID ('.' BUILD-ID)*
+
+PR-ID
+  = PR-NUMERIC
+  / PR-ALPHANUM
+
+PR-NUMERIC
+  =  // numeric identifiers, leading zeros policy:
+    INT-NZ                       // [--accept-leading-zeros=false]
+  / INT-Z                       // [--accept-leading-zeros=true]
+
+PR-ALPHANUM
+  =  // at least one non-digit; may contain '-'
+    DIGITS? NON-DIGIT IDENT-CHAR*
+
+BUILD-ID
+  =  // build identifiers: either "all digits" OR "alphanum (not all digits)"
+    INT-Z
+  / (DIGITS? NON-DIGIT IDENT-CHAR*)
+
+INT-NZ
+  = '0'
+  / [1-9] DIGITS*
+
+INT-Z
+  = DIGITS+
+
+DIGITS
+  = [0-9]+
+
+NON-DIGIT
+  = [A-Za-z-]
+
+IDENT-CHAR
+  = [0-9A-Za-z-]
+
 */
 
 class SemanticVersionParser extends parser.PegParserBase_:
