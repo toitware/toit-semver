@@ -85,73 +85,76 @@ main:
   // Prints 1.2.3
   print "$semver-a"
 
+  // Instantiation by direct creation, without 'minor'
+  semver-b := SemanticVersion 1 2
+
+  // Prints 1.2.0
+  print "$semver-b"
+
   // Instantiation by direct creation, without 'minor' or 'patch'
-  semver-b := SemanticVersion 1
+  semver-c := SemanticVersion 1
 
   // Prints 1.0.0
-  print "$semver-b"
+  print "$semver-c"
 ```
 #### Directly creating including pre-release:
 Pre-release and build-metadata can also be specified directly.  These are held
 as a list and must be specified as a list, even if only one element:
 ```toit
-import semver show *
+  // (Contiues from previous example)
 
-main:
   // Direct instantiation.
-  semver-a := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
+  semver-d := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
 
   // Prints 1.0.0-alpha.1+sha.23132
-  print "$semver-a"
+  print "$semver-d"
 ```
 #### Immutability:
 Since the object is immutable, editing one of the fields after creation is not
 possible.
 ```toit
-import semver show *
+  // (Contiues from previous examples)
 
-main:
-  // Direct instantiation.
-  semver-a := SemanticVersion 1 2 3 ["alpha",1] ["sha",23132]
+  // Direct instantiation including pre-release.
+  semver-e := SemanticVersion 1 2 3 ["alpha",1]
 
   // Prints 2
-  print "$(semver-a.minor)"
+  print "$(semver-e.minor)"
 
-  // Fails
-  semver-a.minor = 5
+  // Fails/throws
+  //semver-e.minor = 5
 ```
 #### Object instantiation by string parsing:
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
 ```toit
-import semver show *
+  // (Contiues from previous examples)
 
-main:
   // strings
-  string-a := "1.0.0"
-  string-b := "1.0.0-beta.1"
+  string-f := "1.0.0"
+  string-g := "1.0.0-beta.1"
 
   // parse strings into SemanticVersion objects
-  semver-a := SemanticVersion.parse string-a
-  semver-b := SemanticVersion.parse string-b
+  semver-f := SemanticVersion.parse string-f
+  semver-g := SemanticVersion.parse string-g
 
-  // compare two objects: prints "a is later than b."
-  if semver-a > semver-b:
-    print "a is later than b."
+  // compare two objects: prints "f is later than g."
+  if semver-f > semver-g:
+    print "f is later than g."
   else:
-    print "b is later than a."
+    print "g is later than f."
 
-  // compare two objects: prints "a and b are different."
-  if semver-a == semver-b:
+  // compare two objects: prints "f and g are different."
+  if semver-f == semver-g:
     print "a and b are the same."
   else:
     print "a and b are different."
 
-  // compare two objects: prints "a and a are the same."
-  if semver-a == semver-a:
-    print "a and a are the same."
+  // compare two objects: prints "f and f are the same."
+  if semver-f == semver-f:
+    print "f and f are the same."
   else:
-    print "a and a are different."
+    print "f and f are different."
 
 ```
 
@@ -160,21 +163,20 @@ This is implemented, but not recommended as it is a computationally expensive -
 string parsing happens every time an evaluation is made. (Code uses the library
 and creates/destroys objects in the background):
 ```toit
-import semver show *
+  // Contiues from previous examples
 
-main:
-  // strings
-  a := "1.0.0"
-  b := "1.0.0-beta.1"
+  // Create strings
+  h := "1.0.0"
+  i := "1.0.0-beta.1"
 
   // compare two strings: prints "Compare is: 1"
-  print "Compare is: $(compare a b)"
+  print "Compare is: $(compare h i)"
 
   // compare two strings: prints "Compare is: -1"
-  print "Compare is: $(compare b a)"
+  print "Compare is: $(compare i h)"
 
   // compare two strings: prints "Compare is: 0"
-  print "Compare is: $(compare a a)"
+  print "Compare is: $(compare i i)"
 
 ```
 

@@ -2,39 +2,44 @@
 // Use of this source code is governed by a Zero-Clause BSD license that can
 // be found in the tests/TESTS_LICENSE file.
 
-import expect show *
 import semver show *
 
 main:
-  // strings
-  a := "1.0.0"
-  b := "1.0.0-beta.1"
+  // EXAMPLE 1
 
-  // compare two strings: prints "Compare is: 1"
-  print "Compare is: $(compare a b)"
+  // Instantiation by direct creation
+  semver-a := SemanticVersion 1 2 3
 
-  // compare two strings: prints "Compare is: -1"
-  print "Compare is: $(compare b a)"
+  // Prints 1.2.3
+  print "$semver-a"
 
-  // compare two strings: prints "Compare is: 0"
-  print "Compare is: $(compare a a)"
+  // Instantiation by direct creation, without 'minor'
+  semver-b := SemanticVersion 1 2
 
-  // parse strings into SemanticVersion objects
-  a-semver := SemanticVersion.parse a
-  b-semver := SemanticVersion.parse b
+  // Prints 1.2.0
+  print "$semver-b"
 
-  // compare two objects: prints "a is later than b"
-  if a-semver > b-semver:
-    print "a is later than b."
-  else:
-    print "b is later than a."
+  // Instantiation by direct creation, without 'minor' or 'patch'
+  semver-c := SemanticVersion 1
 
-  if a-semver == b-semver:
-    print "a and b are the same."
-  else:
-    print "a and b are different."
+  // Prints 1.0.0
+  print "$semver-c"
 
-  if a-semver == a-semver:
-    print "a and a are the same."
-  else:
-    print "a and a are different."
+  // EXAMPLE 2
+
+  // Direct instantiation.
+  semver-d := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
+
+  // Prints 1.0.0-alpha.1+sha.23132
+  print "$semver-d"
+
+  // EXAMPLE 3
+
+  // Direct instantiation including pre-release.
+  semver-e := SemanticVersion 1 2 3 ["alpha",1]
+
+  // Prints 2
+  print "$(semver-e.minor)"
+
+  // Fails/throws
+  //semver-e.minor = 5

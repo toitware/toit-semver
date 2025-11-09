@@ -113,14 +113,14 @@ class SemanticVersion:
     return SemanticVersion.from-parse-result parsed
 
   constructor --major/int --minor/int=0 --patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
+    _major = major
+    _minor = minor
     _patch = patch
     _pre-releases = pre-releases
     _build-numbers = build-numbers
-    _minor = minor
-    _major = major
 
-  // Do we want/need a version like this?
-  constructor major/any minor/int=0 patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
+  // Do we want/need a version like this (without "--")?
+  constructor major/any minor/int=0 patch/int=0 pre-releases/List=[] build-numbers/List=[]:
     _major = major
     _minor = minor
     _patch = patch
