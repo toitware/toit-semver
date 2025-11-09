@@ -41,12 +41,12 @@ Examples of what can be seen in practical use:
 - `2.1.0-beta+exp.sha.5114f85`: This would denotes a beta build, and gives build
   metadata, likely showing a specific experiment/commit.
 
-## Parsing
+## String Parsing
 One way to create a `SemanticVersion` object is to have the library parse a
 string.  Parsing operates as shown in the table below:
 | Example | Compliant? | Explanation | Parsing Result |
 | - | - | - | - |
-| `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. |
+| `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
 | `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Fails parsing but can be parsed with a switch. |
 | `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Fails parsing, but can be parsed with a switch. |
 | `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yelow_circle: Fails, but can be parsed using a switch that drops the leading `v`. |
@@ -73,6 +73,7 @@ about these.  Not all are obvious at first.  They operate in the following way:
 | `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not to be used when comparing. |
 
 ## Library Usage
+#### Creating the object directly:
 Imports the library, and creates a `SemanticVersion` object directly.
 ```toit
 import semver show *
@@ -90,17 +91,20 @@ main:
   // Prints 1.0.0
   print "$semver-b"
 ```
-Pre-release and build-metadata can also be specified directly:
+#### Directly creating including pre-release:
+Pre-release and build-metadata can also be specified directly.  These are held
+as a list and must be specified as a list, even if only one element:
 ```toit
 import semver show *
 
 main:
   // Direct instantiation.
-  semver-a := SemanticVersion 1 0 0 ["alpha",1] ["sha",23132]
+  semver-a := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
 
   // Prints 1.0.0-alpha.1+sha.23132
   print "$semver-a"
 ```
+#### Immutability:
 Since the object is immutable, editing one of the fields after creation is not
 possible.
 ```toit
@@ -116,7 +120,6 @@ main:
   // Fails
   semver-a.minor = 5
 ```
-
 #### Object instantiation by string parsing:
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
