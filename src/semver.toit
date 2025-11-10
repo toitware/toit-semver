@@ -83,59 +83,38 @@ See https://semver.org/ for details.
 */
 
 class SemanticVersion:
-  _major/int
-  _minor/int
-  _patch/int
-  _pre-releases/List
-  _build-numbers/List
+  major/int
+  minor/int
+  patch/int
+  pre-releases/List
+  build-metadata/List
 
   // Changed to accept some extra switches and pass them to the parser
-  static parse input/any
+  static parse input/string
       --accept-missing-minor=false
       --accept-missing-patch=false
       --non-throwing=false
       --accept-leading-zeros=false
       --accept-v=false
       -> SemanticVersion?:
-    version := ""
-    if input is float:
-      version = "$input"
-      accept-missing-patch = true
-      accept-missing-minor = true
-    if input is string:
-      version = input
-    else:
-      throw "Don't know how to parse supplied object."
 
-    parsed := (SemanticVersionParser version --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v).semantic-version --consume-all
-    if parsed == null:
-      return null
+    parsed := (SemanticVersionParser input --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v).semantic-version --consume-all
+    if parsed == null: return null
     return SemanticVersion.from-parse-result parsed
 
-  constructor --major/int --minor/int=0 --patch/int=0 --pre-releases/List=[] --build-numbers/List=[]:
-    _major = major
-    _minor = minor
-    _patch = patch
-    _pre-releases = pre-releases
-    _build-numbers = build-numbers
+  constructor --.major/int --.minor/int=0 --.patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
 
-  // Do we want/need a version like this (without "--")?
-  constructor major/any minor/int=0 patch/int=0 pre-releases/List=[] build-numbers/List=[]:
-    _major = major
-    _minor = minor
-    _patch = patch
-    _pre-releases = pre-releases
-    _build-numbers = build-numbers
+  constructor .major/any .minor/int=0 .patch/int=0 .pre-releases/List=[] .build-metadata/List=[]:
 
   // Result returned from parser
   constructor.from-parse-result parsed/SemanticVersionParseResult:
-    _major = parsed.triple.triple[0]
-    _minor = parsed.triple.triple[1]
-    _patch = parsed.triple.triple[2]
-    _pre-releases = parsed.pre-releases
-    _build-numbers = parsed.build-numbers
+    major = parsed.triple.triple[0]
+    minor = parsed.triple.triple[1]
+    patch = parsed.triple.triple[2]
+    pre-releases = parsed.pre-releases
+    build-metadata = parsed.build-metadata
 
-  triplet -> List: return [_major, _minor, _patch]
+  triplet -> List: return [major, minor, patch]
 
   static compare-lists-less-than_ l1/List l2/List:
     l1.size.repeat:
@@ -146,26 +125,20 @@ class SemanticVersion:
 
   operator < other/SemanticVersion -> bool:
     if compare-lists-less-than_ triplet other.triplet: return true
-    if compare-lists-less-than_ _pre-releases other._pre-releases: return true
+    if compare-lists-less-than_ pre-releases other.pre-releases: return true
     return false
 
   operator > other/SemanticVersion -> bool:
     return not this <= other
 
   operator == other/SemanticVersion -> bool:
-    return triplet == other.triplet and _pre-releases == other._pre-releases
+    return triplet == other.triplet and pre-releases == other.pre-releases
 
   operator >= other/SemanticVersion -> bool:
     return not this < other
 
   operator <= other/SemanticVersion -> bool:
     return this < other or this == other
-
-  major -> int: return _major
-  minor -> int: return _minor
-  patch -> int: return _patch
-  pre-releases -> List: return _pre-releases
-  build-numbers -> List: return _build-numbers
 
   compare-to other/any -> int:
     return compare-to other --if-equal=: 0
@@ -187,57 +160,39 @@ class SemanticVersion:
     return to-string
 
   to-string -> string:
-    str := "$_major.$_minor.$_patch"
-    if not _pre-releases.is-empty:
-      str += "-$(_pre-releases.join ".")"
-    if not _build-numbers.is-empty:
-      str += "+$(_build-numbers.join ".")"
+    str := "$major.$minor.$patch"
+    if not pre-releases.is-empty:
+      str += "-$(pre-releases.join ".")"
+    if not build-metadata.is-empty:
+      str += "+$(build-metadata.join ".")"
     return str
 
-  to-string-list -> List:
-    output/List := []
-    count/int := ?
-    output.add " major:$_major"
-    output.add " minor:$_minor"
-    output.add " patch:$_patch"
-    if not _pre-releases.is-empty:
-      count = 0
-      _pre-releases.do:
-        count += 1
-        output.add " pre-release[$count]: $it"
-    if not _build-numbers.is-empty:
-      count = 0
-      _build-numbers.do:
-        count += 1
-        output.add " build-number[$count]: $it"
-    return output
-
   hash-code:
-    return _major + 1000 * _minor + 1000000 * _patch
+    return major + 1000 * minor + 1000000 * patch
 
 // Object to pass entire 'version-core', including pre-releases,
-// build-numbers, and offset value from parsers
+// build-metadata, and offset value from parsers
 // Added stringify/is-valid only to help troubleshooting
 class SemanticVersionParseResult:
   triple/TripleParseResult?
   pre-releases/List?
-  build-numbers/List?
+  build-metadata/List?
   offset/int?
 
-  constructor .triple .pre-releases .build-numbers .offset:
+  constructor .triple .pre-releases .build-metadata .offset:
 
   stringify -> string:
     str := "$triple"
     if not pre-releases.is-empty:
       str += "-$(pre-releases.join ".")"
-    if not build-numbers.is-empty:
-      str += "+$(build-numbers.join ".")"
+    if not build-metadata.is-empty:
+      str += "+$(build-metadata.join ".")"
     return str
 
   is-valid -> bool:
     if not triple.is-valid: return false
     if pre-releases == null: return false
-    if build-numbers == null: return false
+    if build-metadata == null: return false
     return true
 
 // Object to hold a 'version-core'.
@@ -263,10 +218,10 @@ A PEG grammar for the semantic version.
 semantic-version ::= "v"?
                       version-core
                       pre-releases?
-                      build-numbers?
+                      build-metadata?
 version-core ::= numeric '.' numeric '.' numeric
 pre-releases ::= '-' pre-release ('.' pre-release)*
-build-numbers ::= '+' build-number ('.' build-number)*
+build-metadata ::= '+' build-number ('.' build-number)*
 
 pre-release ::= alphanumeric | numeric
 build-number ::= alphanumeric | digit+
@@ -388,7 +343,7 @@ class SemanticVersionParser extends parser.PegParserBase_:
       optional: (match-string "v") or (match-string "V")
     triple := version-core
     pre-releases := pre-releases
-    build-numbers := build-numbers
+    build-metadata := build-metadata
 
     if non-throwing:
       if not triple.is-valid: return null
@@ -398,7 +353,7 @@ class SemanticVersionParser extends parser.PegParserBase_:
         return null
       else:
         throw "Parse error, not all input was consumed"
-    return SemanticVersionParseResult triple pre-releases build-numbers current-position
+    return SemanticVersionParseResult triple pre-releases build-metadata current-position
 
   version-core -> TripleParseResult:
     major := expect-numeric
@@ -443,7 +398,7 @@ class SemanticVersionParser extends parser.PegParserBase_:
           if not match-char '.': return result
     return []
 
-  build-numbers -> List:
+  build-metadata -> List:
     try-parse:
       result := []
       if match-char '+':

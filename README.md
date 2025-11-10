@@ -101,7 +101,7 @@ main:
 Pre-release and build-metadata can also be specified directly.  These are held
 as a list and must be specified as a list, even if only one element:
 ```toit
-  // (Contiues from previous example)
+  // (Continues from previous example)
 
   // Direct instantiation.
   semver-d := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
@@ -113,10 +113,13 @@ as a list and must be specified as a list, even if only one element:
 Since the object is immutable, editing one of the fields after creation is not
 possible.
 ```toit
-  // (Contiues from previous examples)
+  // (Continues from previous examples)
 
   // Direct instantiation including pre-release.
   semver-e := SemanticVersion 1 2 3 ["alpha",1]
+
+  // Prints 1.2.3-alpha.1
+  print "$(semver-e)"
 
   // Prints 2
   print "$(semver-e.minor)"
@@ -128,7 +131,7 @@ possible.
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
 ```toit
-  // (Contiues from previous examples)
+  // (Continues from previous examples)
 
   // strings
   string-f := "1.0.0"
@@ -163,7 +166,7 @@ This is implemented, but not recommended as it is a computationally expensive -
 string parsing happens every time an evaluation is made. (Code uses the library
 and creates/destroys objects in the background):
 ```toit
-  // Contiues from previous examples
+  // Continues from previous examples
 
   // Create strings
   h := "1.0.0"
