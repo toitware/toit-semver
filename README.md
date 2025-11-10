@@ -57,7 +57,7 @@ string.  Parsing operates as shown in the table below:
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
 
-## Logical Operators
+## Comparison operators
 The library implements code to support the standard comparators,
 such as `>`,  `<=`, etc. The [standard](https://semver.org/) dictates rules
 about these.  Not all are obvious at first.  They operate in the following way:
