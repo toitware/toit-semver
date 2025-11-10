@@ -130,7 +130,6 @@ and functions.  Comparison operators are shown in the example below.
 ```toit
   // (Continues from previous examples).
 
-  // strings
   string-f := "1.0.0"
   string-g := "1.0.0-beta.1"
 
