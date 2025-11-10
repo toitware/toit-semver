@@ -79,22 +79,22 @@ Imports the library, and creates a `SemanticVersion` object directly.
 import semver show *
 
 main:
-  // Instantiation by direct creation
+  // Instantiation by direct creation.
   semver-a := SemanticVersion 1 2 3
 
-  // Prints 1.2.3
+  // Prints '1.2.3'.
   print "$semver-a"
 
-  // Instantiation by direct creation, without 'minor'
+  // Instantiation by direct creation, without 'minor'.
   semver-b := SemanticVersion 1 2
 
-  // Prints 1.2.0
+  // Prints '1.2.0'.
   print "$semver-b"
 
-  // Instantiation by direct creation, without 'minor' or 'patch'
+  // Instantiation by direct creation, without 'minor' or 'patch'.
   semver-c := SemanticVersion 1
 
-  // Prints 1.0.0
+  // Prints '1.0.0'.
   print "$semver-c"
 ```
 #### Directly creating including pre-release:
