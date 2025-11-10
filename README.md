@@ -158,9 +158,12 @@ and functions.  Comparison operators are shown in the example below.
 ```
 
 #### Simple comparison using strings only:
-This is implemented, but not recommended as it is a computationally expensive -
-string parsing happens every time an evaluation is made. (Code uses the library
-and creates/destroys objects in the background):
+For convenience and backwards compatibility, it is also possible to compare strings directly. In
+the background the library creates the corresponding `SemanticVersion` instances and uses
+them for comparison.
+
+Similar to all `compare-to` functions the `compare` function returns -1 if the left-hand side is less
+than the right-hand side; 0 if they are equal, and 1 otherwise.
 ```toit
   // Continues from previous examples
 
