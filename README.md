@@ -58,7 +58,7 @@ See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder an
 
 
 ## Logical Operators
-The library implements code to support the normal logic operators/comparators,
+The library implements code to support the standard comparators,
 such as `>`,  `<=`, etc. The [standard](https://semver.org/) dictates rules
 about these.  Not all are obvious at first.  They operate in the following way:
 | Example | Explanation |
