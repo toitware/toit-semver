@@ -198,7 +198,7 @@ code to crash/stop):
 Switches can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
-| `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, eg still expects `minor`. |
+| `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, but still expects `minor`. |
 | `.parse "1" --accept-missing-patch --non-throwing` | Even with both switches this will return `null`. The `--accept-missing-patch` switch only excepts a missing `patch` definition.  In this case it would still expect the `minor` integer. |
 | `.parse 1.54` | In this case 1.2 is a `float` and will return `1.2.0`, assuming `0` for the patch value.  **Note:** If the `float` is the result of some earlier math and is stored as `1.539999999997`, intervention is required if the intention was `1.54`. |
 | `.parse "v1.2.3" --non-throwing` | Will return `null`.  The presence of `V` would normally throw without the `--accept-v` switch. |
