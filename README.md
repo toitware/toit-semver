@@ -24,7 +24,7 @@ See: [semver.org](https://semver.org/).
 | Token | Name | Type | Notes |
 | - | - | - | - |
 | `x` | `major` | integer | Denotes a major version, and is incremented when there are backward-incompatible changes. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
-| `y` | `minor` | integer | Denotes a minor version differece, most often incremented on the introduction of backward-compatible feature additions. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
+| `y` | `minor` | integer | Denotes a minor version difference, most often incremented on the introduction of backward-compatible feature additions. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
 | `z` | `patch` | integer | **MANDATORY:**Incremented for backward-compatible fixes or improvements. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero.|
 | `a` | `pre-release` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** Indicates the version is a pre-release ahead of the numeric portion. |
 | `b` | `build-metadata` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** This portion is informational only, and usuall references a specific build.  The standard dictates that it MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
@@ -49,7 +49,7 @@ string.  Parsing operates as shown in the table below:
 | `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
 | `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Fails parsing but can be parsed with a switch. |
 | `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Fails parsing, but can be parsed with a switch. |
-| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yelow_circle: Fails, but can be parsed using a switch that drops the leading `v`. |
+| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a switch that drops the leading `v`. |
 | `1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a switch. |
 |`1.0.0-beta`| Compliant | Accepted, but `pre-release` definition could be confusing. Suggest using `1.0.0-beta.1` | :green_circle: Parses successfully. |
 | `1.0.0.1` | Not compliant | Uses four parts.  Last delimiter should be `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
@@ -57,8 +57,8 @@ string.  Parsing operates as shown in the table below:
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
 
-## Logical Operators
-The library implements code to support the normal logic operators/comparators,
+## Comparison operators
+The library implements code to support the standard comparators,
 such as `>`,  `<=`, etc. The [standard](https://semver.org/) dictates rules
 about these.  Not all are obvious at first.  They operate in the following way:
 | Example | Explanation |
@@ -69,8 +69,8 @@ about these.  Not all are obvious at first.  They operate in the following way:
 | `1.2.3-beta.2.1` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
 | `1.2.3-beta.2` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
 | `1.2.3-beta` > `1.2.3-1` | Where strings and integers must be compared, strings have a higher precedence than integers. |
-| `1.2.3-beta+abcd` = `1.2.3-beta` | Build-metadata is not to be used when comparing. |
-| `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not to be used when comparing. |
+| `1.2.3-beta+abcd` = `1.2.3-beta` | Build-metadata is not used when comparing. |
+| `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not used when comparing. |
 
 ## Library Usage
 #### Creating the object directly:
@@ -79,22 +79,22 @@ Imports the library, and creates a `SemanticVersion` object directly.
 import semver show *
 
 main:
-  // Instantiation by direct creation
+  // Instantiation by direct creation.
   semver-a := SemanticVersion 1 2 3
 
-  // Prints 1.2.3
+  // Prints '1.2.3'.
   print "$semver-a"
 
-  // Instantiation by direct creation, without 'minor'
+  // Instantiation by direct creation, without 'minor'.
   semver-b := SemanticVersion 1 2
 
-  // Prints 1.2.0
+  // Prints '1.2.0'.
   print "$semver-b"
 
-  // Instantiation by direct creation, without 'minor' or 'patch'
+  // Instantiation by direct creation, without 'minor' or 'patch'.
   semver-c := SemanticVersion 1
 
-  // Prints 1.0.0
+  // Prints '1.0.0'.
   print "$semver-c"
 ```
 #### Directly creating including pre-release:
@@ -131,13 +131,12 @@ possible.
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
 ```toit
-  // (Continues from previous examples)
+  // (Continues from previous examples).
 
-  // strings
   string-f := "1.0.0"
   string-g := "1.0.0-beta.1"
 
-  // parse strings into SemanticVersion objects
+  // Parse the strings into SemanticVersion objects.
   semver-f := SemanticVersion.parse string-f
   semver-g := SemanticVersion.parse string-g
 
@@ -162,24 +161,27 @@ and functions.  Comparison operators are shown in the example below.
 ```
 
 #### Simple comparison using strings only:
-This is implemented, but not recommended as it is a computationally expensive -
-string parsing happens every time an evaluation is made. (Code uses the library
-and creates/destroys objects in the background):
+For convenience and backwards compatibility, it is also possible to compare strings directly. In
+the background the library creates the corresponding `SemanticVersion` instances and uses
+them for comparison.
+
+Similar to all `compare-to` functions the `compare` function returns -1 if the left-hand side is less
+than the right-hand side; 0 if they are equal, and 1 otherwise.
 ```toit
   // Continues from previous examples
 
   // Create strings
-  h := "1.0.0"
-  i := "1.0.0-beta.1"
+  v1 := "1.0.0"
+  v1-beta := "1.0.0-beta.1"
 
-  // compare two strings: prints "Compare is: 1"
-  print "Compare is: $(compare h i)"
+  // Compare the two strings. Prints "Compare is: 1".
+  print "Compare is: $(compare v1 v1-beta)"
 
   // compare two strings: prints "Compare is: -1"
-  print "Compare is: $(compare i h)"
+  print "Compare is: $(compare v1-beta v1)"
 
   // compare two strings: prints "Compare is: 0"
-  print "Compare is: $(compare i i)"
+  print "Compare is: $(compare v1 v1)"
 
 ```
 
@@ -199,8 +201,8 @@ code to crash/stop):
 Switches can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
-| `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, eg still expects `minor`. |
-| `.parse "1" --accept-missing-patch --non-throwing` | Even with both switches this will return `null`. The `--accept-missing-patch` switch only excepts a missing `patch` definition.  In this case it would still expect the `minor` integer. |
+| `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, but still expects `minor`. |
+| `.parse "1" --accept-missing-patch --if-error=(: null)` | Invokes the `if-error` block since a `minor` is missing, thus returning `null`. |
 | `.parse 1.54` | In this case 1.2 is a `float` and will return `1.2.0`, assuming `0` for the patch value.  **Note:** If the `float` is the result of some earlier math and is stored as `1.539999999997`, intervention is required if the intention was `1.54`. |
 | `.parse "v1.2.3" --non-throwing` | Will return `null`.  The presence of `V` would normally throw without the `--accept-v` switch. |
 | `.parse "1.2.3-beta-2.3"` | Parses, but potentially not in the expected way.  The second `-` is allowed but becomes part of the first string, not a delimiter for a second. So actually parses as `pre-releases[0] = "beta-2"` and `pre-releases[1] = "3"`.  The difference is not seen when turned back into a string.  Complications would be noticed though during comparisons, which iterate through the set of pre-release strings one by one. |
