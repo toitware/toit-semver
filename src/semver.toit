@@ -11,36 +11,38 @@ See https://semver.org/ for details.
 */
 
 /** Todo:
-- We could probably lose the 'TripleParseResult' as it adds no value, combining
-  it into SemanticVersionParseResult.
 - Evaluate tests - new test doesn't use expect, not sure of consequence.
 */
 
 // Text code had a method for determining if a semver was valid.
 is-valid
     input/string
-    --accept-missing-minor=false
-    --accept-missing-patch=false
-    --non-throwing=false
-    --accept-leading-zeros=false
-    --accept-v=false
+    --accept-missing-minor/bool=false
+    --accept-missing-patch/bool=false
+    --non-throwing/bool=false
+    --accept-leading-zeros/bool=false
+    --accept-v/bool=false
     -> bool:
   // Normalize both sides to SemanticVersion
   parsed-input := SemanticVersion.parse input --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v
   return (parsed-input != null)
 
 // Text code had a method for comparing two arbitrary versions.
-compare input-a/string input-b/string [--if-equal] -> int:
+compare input-a/string input-b/string [--if-equal]
+    --accept-missing-minor/bool=false
+    --accept-missing-patch/bool=false
+    --non-throwing/bool=false
+    --accept-leading-zeros/bool=false
+    --accept-v/bool=false
+    -> int:
+
   // Normalize both sides to SemanticVersion
-  a/SemanticVersion? := (input-a is SemanticVersion) ? input-a : SemanticVersion.parse input-a
-  b/SemanticVersion? := (input-b is SemanticVersion) ? input-b : SemanticVersion.parse input-b
+  a/SemanticVersion? := SemanticVersion.parse input-a --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v
+  b/SemanticVersion? := SemanticVersion.parse input-b --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v
   if (a is not SemanticVersion) or (b is not SemanticVersion):
     throw "compare: Unable to parse one (or both) inputs."
-  output:= a.compare-to b
-  if output == 0:
-    return if-equal.call
-  else:
-    return 0
+  return a.compare-to b --if-equal=if-equal
+
 
 // Text code had a method for executing a block, for two arbitrary versions.
 compare input-a/any input-b/any -> int:
@@ -55,11 +57,11 @@ class SemanticVersion:
 
   // Changed to accept some extra switches and pass them to the parser
   static parse input/string
-      --accept-missing-minor=false
-      --accept-missing-patch=false
-      --non-throwing=false
-      --accept-leading-zeros=false
-      --accept-v=false
+      --accept-missing-minor/bool=false
+      --accept-missing-patch/bool=false
+      --non-throwing/bool=false
+      --accept-leading-zeros/bool=false
+      --accept-v/bool=false
       -> SemanticVersion?:
 
     parsed := (SemanticVersionParser input --accept-missing-minor=accept-missing-minor --accept-missing-patch=accept-missing-patch --non-throwing=non-throwing --accept-leading-zeros=accept-leading-zeros --accept-v=accept-v).semantic-version --consume-all
@@ -71,7 +73,7 @@ class SemanticVersion:
   constructor .major/any .minor/int=0 .patch/int=0 .pre-releases/List=[] .build-metadata/List=[]:
 
   // Result returned from parser
-  constructor.from-parse-result parsed/SemanticVersionParseResult:
+  constructor.from-parse-result parsed/SemanticVersion:
     major = parsed.major
     minor = parsed.minor
     patch = parsed.patch
@@ -134,27 +136,6 @@ class SemanticVersion:
   hash-code:
     return major + 1000 * minor + 1000000 * patch
 
-// Object to pass entire 'version-core', including pre-releases,
-// build-metadata, and offset value from parsers
-// Added stringify/is-valid only to help troubleshooting
-class SemanticVersionParseResult:
-  major/int?
-  minor/int?
-  patch/int?
-  pre-releases/List?
-  build-metadata/List?
-  offset/int?
-
-  constructor .major .minor .patch .pre-releases .build-metadata .offset:
-
-  stringify -> string:
-    str := "$major.$minor.$patch"
-    if not pre-releases.is-empty:
-      str += "-$(pre-releases.join ".")"
-    if not build-metadata.is-empty:
-      str += "+$(build-metadata.join ".")"
-    return str
-
   is-valid -> bool:
     if major == null: return false
     if minor == null: return false
@@ -189,7 +170,7 @@ class SemanticVersionParser extends parser.PegParserBase_:
     else:
       throw "Parse error, expected a numeric value at position $current-position"
 
-  semantic-version --consume-all/bool=false -> SemanticVersionParseResult?:
+  semantic-version --consume-all/bool=false -> SemanticVersion?:
     if accept-v:
       optional: (match-string "v") or (match-string "V")
     version-core-list := version-core
@@ -204,7 +185,8 @@ class SemanticVersionParser extends parser.PegParserBase_:
         return null
       else:
         throw "Parse error, not all input was consumed"
-    return SemanticVersionParseResult version-core-list[0] version-core-list[1] version-core-list[2] pre-releases build-metadata current-position
+      //current-position not returned
+    return SemanticVersion version-core-list[0] version-core-list[1] version-core-list[2] pre-releases build-metadata
 
   version-core -> List:
     major := expect-numeric
@@ -219,8 +201,8 @@ class SemanticVersionParser extends parser.PegParserBase_:
           else:
             patch = 0
         else:
-          // Should never happen as can't have missing
-          // minor but present patch
+          // Should never happen as can't have minor missing
+          // whilst having patch present.
           patch = expect-match_ '.'
           patch = expect-numeric
       else:
