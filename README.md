@@ -133,7 +133,7 @@ and functions.  Comparison operators are shown in the example below.
   string-f := "1.0.0"
   string-g := "1.0.0-beta.1"
 
-  // parse strings into SemanticVersion objects
+  // Parse the strings into SemanticVersion objects.
   semver-f := SemanticVersion.parse string-f
   semver-g := SemanticVersion.parse string-g
 
