@@ -162,7 +162,7 @@ This is implemented, but not recommended as it is a computationally expensive -
 string parsing happens every time an evaluation is made. (Code uses the library
 and creates/destroys objects in the background):
 ```toit
-  // Contiues from previous examples
+  // Continues from previous examples
 
   // Create strings
   h := "1.0.0"
