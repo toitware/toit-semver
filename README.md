@@ -24,7 +24,7 @@ See: [semver.org](https://semver.org/).
 | Token | Name | Type | Notes |
 | - | - | - | - |
 | `x` | `major` | integer | Denotes a major version, and is incremented when there are backward-incompatible changes. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
-| `y` | `minor` | integer | Denotes a minor version differece, most often incremented on the introduction of backward-compatible feature additions. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
+| `y` | `minor` | integer | Denotes a minor version difference, most often incremented on the introduction of backward-compatible feature additions. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
 | `z` | `patch` | integer | **MANDATORY:**Incremented for backward-compatible fixes or improvements. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero.|
 | `a` | `pre-release` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** Indicates the version is a pre-release ahead of the numeric portion. |
 | `b` | `build-metadata` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** This portion is informational only, and usuall references a specific build.  The standard dictates that it MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
