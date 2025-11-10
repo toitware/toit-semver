@@ -70,7 +70,7 @@ class SemanticVersion:
 
   constructor --.major/int --.minor/int=0 --.patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
 
-  constructor .major/any .minor/int=0 .patch/int=0 .pre-releases/List=[] .build-metadata/List=[]:
+  constructor .major/any .minor/int=0 .patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
 
   // Result returned from parser
   constructor.from-parse-result parsed/SemanticVersion:
@@ -186,7 +186,7 @@ class SemanticVersionParser extends parser.PegParserBase_:
       else:
         throw "Parse error, not all input was consumed"
       //current-position not returned
-    return SemanticVersion version-core-list[0] version-core-list[1] version-core-list[2] pre-releases build-metadata
+    return SemanticVersion version-core-list[0] version-core-list[1] version-core-list[2] --pre-releases=pre-releases --build-metadata=build-metadata
 
   version-core -> List:
     major := expect-numeric
