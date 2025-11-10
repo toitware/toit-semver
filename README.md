@@ -168,17 +168,17 @@ than the right-hand side; 0 if they are equal, and 1 otherwise.
   // Continues from previous examples
 
   // Create strings
-  h := "1.0.0"
-  i := "1.0.0-beta.1"
+  v1 := "1.0.0"
+  v1-beta := "1.0.0-beta.1"
 
-  // compare two strings: prints "Compare is: 1"
-  print "Compare is: $(compare h i)"
+  // Compare the two strings. Prints "Compare is: 1".
+  print "Compare is: $(compare v1 v1-beta)"
 
   // compare two strings: prints "Compare is: -1"
-  print "Compare is: $(compare i h)"
+  print "Compare is: $(compare v1-beta v1)"
 
   // compare two strings: prints "Compare is: 0"
-  print "Compare is: $(compare i i)"
+  print "Compare is: $(compare v1 v1)"
 
 ```
 
