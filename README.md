@@ -49,7 +49,7 @@ string.  Parsing operates as shown in the table below:
 | `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
 | `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Fails parsing but can be parsed with a switch. |
 | `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Fails parsing, but can be parsed with a switch. |
-| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yelow_circle: Fails, but can be parsed using a switch that drops the leading `v`. |
+| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a switch that drops the leading `v`. |
 | `1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a switch. |
 |`1.0.0-beta`| Compliant | Accepted, but `pre-release` definition could be confusing. Suggest using `1.0.0-beta.1` | :green_circle: Parses successfully. |
 | `1.0.0.1` | Not compliant | Uses four parts.  Last delimiter should be `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
