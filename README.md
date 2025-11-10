@@ -128,7 +128,7 @@ possible.
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
 ```toit
-  // (Contiues from previous examples)
+  // (Continues from previous examples).
 
   // strings
   string-f := "1.0.0"
