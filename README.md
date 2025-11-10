@@ -69,8 +69,8 @@ about these.  Not all are obvious at first.  They operate in the following way:
 | `1.2.3-beta.2.1` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
 | `1.2.3-beta.2` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
 | `1.2.3-beta` > `1.2.3-1` | Where strings and integers must be compared, strings have a higher precedence than integers. |
-| `1.2.3-beta+abcd` = `1.2.3-beta` | Build-metadata is not to be used when comparing. |
-| `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not to be used when comparing. |
+| `1.2.3-beta+abcd` = `1.2.3-beta` | Build-metadata is not used when comparing. |
+| `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not used when comparing. |
 
 ## Library Usage
 #### Creating the object directly:
