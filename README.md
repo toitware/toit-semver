@@ -199,7 +199,7 @@ Switches can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
 | `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, but still expects `minor`. |
-| `.parse "1" --accept-missing-patch --non-throwing` | Even with both switches this will return `null`. The `--accept-missing-patch` switch only excepts a missing `patch` definition.  In this case it would still expect the `minor` integer. |
+| `.parse "1" --accept-missing-patch --if-error=(: null)` | Invokes the `if-error` block since a `minor` is missing, thus returning `null`. |
 | `.parse 1.54` | In this case 1.2 is a `float` and will return `1.2.0`, assuming `0` for the patch value.  **Note:** If the `float` is the result of some earlier math and is stored as `1.539999999997`, intervention is required if the intention was `1.54`. |
 | `.parse "v1.2.3" --non-throwing` | Will return `null`.  The presence of `V` would normally throw without the `--accept-v` switch. |
 | `.parse "1.2.3-beta-2.3"` | Parses, but potentially not in the expected way.  The second `-` is allowed but becomes part of the first string, not a delimiter for a second. So actually parses as `pre-releases[0] = "beta-2"` and `pre-releases[1] = "3"`.  The difference is not seen when turned back into a string.  Complications would be noticed though during comparisons, which iterate through the set of pre-release strings one by one. |
