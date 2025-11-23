@@ -122,9 +122,9 @@ VISUAL-CHECK ::= [
   ["1.0.0+a-b", PASS],
   ["1.0.0+a-z.A-Z.0-9.00", PASS],
   ["1.0.0-beta.90-beta.90", PASS],
-  ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", FAIL], // more than one pre-release
+  // more than one '-' is allowed - all later -'s treated as part of the string.
+  ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS],
 ]
-
 
 main:
   test "Tests" TESTS
@@ -145,7 +145,7 @@ test label/string tests/List --visual=false:
     result := ""
     a := entry[0]
     expected := entry[1]
-    attempt := (SemanticVersion.parse a --non-throwing --accept-missing-minor --accept-missing-patch --accept-leading-zeros)
+    attempt := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --if-error=(: null))
     parsed :=  attempt is SemanticVersion
 
     if parsed == expected:
@@ -159,11 +159,3 @@ test label/string tests/List --visual=false:
       result += "[$a] FAILED parsing. "
 
     print result
-
-    if visual:
-      if parsed:
-        print " VISUAL TEST A:"
-        print "   [$(attempt.to-string)]"
-        print "          VS B:"
-        attempt.to-string-list.do:
-          print "  $(it)"

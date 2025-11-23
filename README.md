@@ -104,7 +104,7 @@ as a list and must be specified as a list, even if only one element:
   // (Continues from previous example)
 
   // Direct instantiation.
-  semver-d := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
+  semver-d := SemanticVersion 1 0 0 --pre-releases=["alpha","1"] --build-metadata=["sha",23132]
 
   // Prints 1.0.0-alpha.1+sha.23132
   print "$semver-d"
@@ -116,16 +116,27 @@ possible.
   // (Continues from previous examples)
 
   // Direct instantiation including pre-release.
-  semver-e := SemanticVersion 1 2 3 ["alpha",1]
+  semver-e := SemanticVersion 1 2 3 --pre-releases=["alpha",1]
 
-  // Prints 1.2.3-alpha.1
+  // Prints '1.2.3-alpha.1'
   print "$(semver-e)"
 
   // Prints 2
   print "$(semver-e.minor)"
 
   // Fails/throws
-  //semver-e.minor = 5
+  //semver-e.minor = 15
+```
+However, there is an easy way to quickly create a new instance with one or
+more changed properties:
+```
+  // (Continues from previous examples)
+
+  // Create semver-e-new with minor now = 15
+  semver-e-new := semver-e.with --minor=15
+
+  // Prints '1.15.3-alpha.1'
+  print "$(semver-e-new)"
 ```
 #### Object instantiation by string parsing:
 The library parses strings into a `SemanticVersion` object, which has methods

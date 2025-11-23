@@ -29,7 +29,7 @@ main:
   // EXAMPLE: Directly creating including pre-release
 
   // Direct instantiation.
-  semver-d := SemanticVersion 1 0 0 ["alpha","1"] ["sha",23132]
+  semver-d := SemanticVersion 1 0 0 --pre-releases=["alpha","1"] --build-metadata=["sha",23132]
 
   // Prints 1.0.0-alpha.1+sha.23132
   print "$semver-d"
@@ -38,7 +38,7 @@ main:
   // EXAMPLE: Immutability
 
   // Direct instantiation including pre-release.
-  semver-e := SemanticVersion 1 2 3 ["alpha",1]
+  semver-e := SemanticVersion 1 2 3 --pre-releases=["alpha",1]
 
   // Prints 1.2.3-alpha.1
   print "$(semver-e)"

@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Toitware ApS.
+// Copyright (C) 2025 Toitware ApS.
 // Use of this source code is governed by a Zero-Clause BSD license that can
 // be found in the tests/TESTS_LICENSE file.
 
@@ -21,7 +21,8 @@ TESTS ::= [
 
 // From https://github.com/omichelsen/compare-versions/blob/main/test/compare.ts.
 
-// Single-segment versions are not valid semver, but we support them in comparisons.
+// XXXX Single-segment versions are not valid semver, but we support them in comparisons.  XXXX
+// Only supported with the valid switches.
 SINGLE-SEGMENT ::= [
   ["10", "9", 1],
   ["10", "10", 0],
@@ -29,7 +30,8 @@ SINGLE-SEGMENT ::= [
 
 ]
 
-// Double-segment versions are not valid semver, but we support them in comparisons.
+// XXXX Double-segment versions are not valid semver, but we support them in comparisons.  XXXX
+// Only supported with the valid switches.
 TWO-SEGMENT ::= [
   ["10.8", "10.4", 1],
   ["10.1", "10.1", 0],
@@ -44,7 +46,11 @@ THREE-SEGMENT ::= [
   ["11.0.2", "11.0.10", -1],
 ]
 
-// Four-segment versions are not valid semver, but we support them in comparisons.
+// CHANGED
+// XXX Four-segment versions are not valid semver, but we support them in comparisons.
+// Four-segment semver are not valid semver and should be marked invalid.
+// Four-segment semver either throw, or return null and can't be compared.
+/*
 FOUR-SEGMENT ::= [
   ["1.0.0.0", "1", 0],
   ["1.0.0.0", "1.0", 0],
@@ -58,6 +64,7 @@ FOUR-SEGMENT ::= [
   ["1.0.0.0-alpha", "1.0.0-alpha", 0],
   ["1.0.0.0-alpha", "1.0.0.0-beta", -1]
 ]
+*/
 
 DIFFERENT-SEGMENT ::= [
   ["11.1.10", "11.0", 1],
@@ -112,14 +119,15 @@ main:
   test "single" SINGLE-SEGMENT
   test "two" TWO-SEGMENT
   test "three" THREE-SEGMENT
-  test "four" FOUR-SEGMENT
+  // Removed, see above.
+  //test "four" FOUR-SEGMENT
   test "different" DIFFERENT-SEGMENT
   test "prerelease" PRERELEASE
   test "leading 0" LEADING-0
   test "build metadata" BUILD-METADATA
 
 test-spec-tests:
-  expect-equals 0 (semver.compare TESTS[0] TESTS[0])
+  expect-equals 0 (semver.compare TESTS[0] TESTS[0] )
 
   for i := 1; i < TESTS.size; i++:
     a := TESTS[i - 1]
@@ -139,11 +147,11 @@ test-if-equal:
   expect-equals -1 (semver.compare "1.0.0-alpha" "1.0.0-alpha" --if-equal=: -1)
 
 test-leading-v:
-  expect-equals 0 (semver.compare "v1.0.0" "1.0.0")
-  expect-equals 0 (semver.compare "v1.0.0" "v1.0.0")
+  expect-equals 0 (semver.compare "v1.0.0" "1.0.0" --accept-v)
+  expect-equals 0 (semver.compare "v1.0.0" "v1.0.0" --accept-v)
 
-  expect-equals 1 (semver.compare "v1.0.0" "0.0.0")
-  expect-equals 1 (semver.compare "v1.0.0" "v0.0.0")
+  expect-equals 1 (semver.compare "v1.0.0" "0.0.0" --accept-v)
+  expect-equals 1 (semver.compare "v1.0.0" "v0.0.0" --accept-v)
 
 test label/string tests/List:
   tests.do: | entry/List |
@@ -151,5 +159,7 @@ test label/string tests/List:
     b := entry[1]
     expected := entry[2]
 
-    expect-equals expected (semver.compare a b)
-    expect-equals -expected (semver.compare b a)
+    print "TESTING a:$a and b:$b"
+
+    expect-equals expected (semver.compare a b --accept-missing-minor --accept-missing-patch --accept-v --accept-leading-zeros)
+    expect-equals -expected (semver.compare b a  --accept-missing-minor --accept-missing-patch --accept-v --accept-leading-zeros)

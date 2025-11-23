@@ -36,6 +36,7 @@ main:
   expect-not (semver.is-valid "1.0.0-+build.1")
   expect-not (semver.is-valid "1.0.0-+build.1+build.2")
   expect-not (semver.is-valid "1.0.0-01")
+  expect (semver.is-valid "1.0.0-01a")
   expect-not (semver.is-valid "1.0.0-a'b")
   expect-not (semver.is-valid "1.0.0-a'b.10")
   expect-not (semver.is-valid "1.0.0-ä")
@@ -44,30 +45,26 @@ main:
   expect-not (semver.is-valid "1.0.0+ä")
   expect-not (semver.is-valid "1.0.0-a-z.A-Z.0-9.00")
 
-  expect (semver.is-valid "v1.0.0")
-  // should not parse unless --allow-v is provided
-  // ("no"-allow-v not allowed as argument)
-  //expect-not (semver.is-valid --no-allow-v "v1.0.0")
   expect-not (semver.is-valid "v1.0.0")
+  expect (semver.is-valid "v1.0.0" --accept-v)
 
   // Needed to drop --no-require-major-minor-patch: can't start with "no".
   // changed to
-  expect (semver.is-valid --accept-missing-minor "1")
+  expect (semver.is-valid "1" --accept-missing-minor)
   expect-not (semver.is-valid "1")
-  expect (semver.is-valid --accept-missing-minor "1.2")
-  expect-not (semver.is-valid --accept-missing-patch "1.2")
-  expect (semver.is-valid --accept-missing-minor "1.2.3")
+  expect-not (semver.is-valid "1.2" --accept-missing-minor)
+  expect (semver.is-valid "1.2" --accept-missing-patch)
+  expect (semver.is-valid "1.2.3" --accept-missing-minor)
 
-/*
-  expect (semver.is-valid --accept-missing-minor --accept-missing-patch "1-alpha")
-  expect (semver.is-valid --no-require-major-minor-patch "1.2-alpha")
-  expect (semver.is-valid --no-require-major-minor-patch "1-beta+a-z.A-Z.0-9.00")
-  expect (semver.is-valid --no-require-major-minor-patch "1.0-beta+a-z.A-Z.0-9.00")
 
-  expect-not (semver.is-valid --no-require-major-minor-patch "1.0.0-+build.1+build.2")
-  expect-not (semver.is-valid --no-require-major-minor-patch "1.0.0-01")
-  expect-not (semver.is-valid --no-require-major-minor-patch "1.0.0-ä")
+  expect (semver.is-valid "1-alpha" --accept-missing-minor --accept-missing-patch)
+  expect (semver.is-valid "1.2-alpha" --accept-missing-patch)
+  expect (semver.is-valid "1-beta+a-z.A-Z.0-9.00" --accept-missing-minor)
+  expect (semver.is-valid "1.0-beta+a-z.A-Z.0-9.00" --accept-missing-patch)
 
-  expect-not (semver.is-valid --no-require-major-minor-patch --no-allow-v "v1.0.0")
-  expect-not (semver.is-valid --no-require-major-minor-patch --no-allow-v "v1")
-*/
+  expect-not (semver.is-valid "1.0.0-+build.1+build.2")
+  expect-not (semver.is-valid "1.0.0-01")
+  expect-not (semver.is-valid "1.0.0-ä")
+
+  expect-not (semver.is-valid "v1.0.0")
+  expect-not (semver.is-valid "v1")
