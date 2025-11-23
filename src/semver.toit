@@ -11,7 +11,6 @@ A semantic versioning library.
 See https://semver.org/ for details.
 */
 
-
 USE-PEG ::= true
 
 /**
@@ -29,8 +28,6 @@ is-valid
     --accept-leading-zeros/bool=false
     --accept-v/bool=false
     -> bool:
-
-  print "Testing '$(input)'"
 
   // Normalize to SemanticVersion.  If fails, then is invalid.
   parsed-input := SemanticVersion.parse input
@@ -294,9 +291,8 @@ class SemanticVersion:
   compare-to other/SemanticVersion -> int:
     return compare-to other --if-equal=: 0
 
-  // Text code had a method for executing a block, for two arbitrary objects.
+  // Text based method had a method for executing a block, for two semvers.
   compare-to other/SemanticVersion [--if-equal] -> int:
-    //print "Comparing '$(this)' and '$(other)' (< is -1) (> is 1)"
     if this < other: return -1
     if this == other: return if-equal.call
     return 1
@@ -400,15 +396,11 @@ class SemanticVersionTXTParser:
       if (it.size > 1) and (it[0] == "0") and (not accept-leading-zeros):
         throw "Leading zeros in version-core part '$it'."
 
-    //Troubleshoot:
-    //print "$(pre-releases-list)"
-
-    // Convert to ints
+    // Convert to ints.
     version-core-ints := []
     version-core-list.do:
       digits := it
       version-core-ints.add (int.parse digits --if-error=: throw "Version number '$(digits)' not an integer")
-
 
     return SemanticVersion
       version-core-ints[0]
@@ -615,6 +607,9 @@ class SemanticVersionTXTParser:
       if part.size > 1 and part[0] == '0': return false
 
     return true
+
+
+// ORIGINAL PEG PARSER CODE BELOW HERE -----------------------------------------
 
 class SemanticVersionPEGParser extends parser.PegParserBase_:
   accept-missing-minor/bool
