@@ -26,8 +26,8 @@ See: [semver.org](https://semver.org/).
 | `x` | `major` | integer | Denotes a major version, and is incremented when there are backward-incompatible changes. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
 | `y` | `minor` | integer | Denotes a minor version difference, most often incremented on the introduction of backward-compatible feature additions. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero. |
 | `z` | `patch` | integer | **MANDATORY:**Incremented for backward-compatible fixes or improvements. Part of 'version-core'. If unused, can be `0`. One of version-core must be non-zero.|
-| `a` | `pre-release` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** Indicates the version is a pre-release ahead of the numeric portion. |
-| `b` | `build-metadata` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** This portion is informational only, and usuall references a specific build.  The standard dictates that it MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
+| `a` | `pre-release` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** Indicates the version is a pre-release.  The same version without the pre-releases will be ahead (newer/better/greater than) the pre-release version. |
+| `b` | `build-metadata` | Set of zero or more integers/strings, delimited by `.` | **OPTIONAL:** This portion is informational only, and usually references a specific build.  The semver standard dictates that it MUST be ignored when determining version precedence. [link](https://semver.org/#spec-item-10). |
 
 There are more detailed rules around what characters are valid after certain
 others - please see: [semver.org](https://semver.org/) for the complete
@@ -220,10 +220,10 @@ potentially cause code to crash/stop):
 | Example switch | Examples using the switch |
 | - | - |
 | `.parse "1" --accept-missing-minor` |  Will parse as `1.0.0`. |
-| `.parse "1.4" --accept-missing-minor` |  Will not parse - missing `--accept-missing-patch`. |
+| `.parse "1.4" --accept-missing-minor` |  Will not parse.  Will parse with `--accept-missing-patch`. |
 | `.parse "1.2" --accept-missing-patch` | Will parse as `1.2.0`. |
 | `.parse "1.2.03" --accept-leading-zeros` | This, and other variations like `1.02.3`, `001.002.003` will all parse as `1.2.3`.  Also accepts leading zeros on numeric `--pre-releases`, which normally would not parse. |
-| `.parse "v1.2.3" --accept-v` |  Parses as `1.2.3`. |
+| `.parse "v1.2.3" --accept-v` |  Ignores the preceeding 'v', and parses as `1.2.3`. |
 | `.parse "1.a.3" --if-error=(: null)` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block instead, in this case producing `null` as the result.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces).) |
 
 #### Example Combinations and Exceptions :
