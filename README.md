@@ -126,10 +126,10 @@ possible.
 
   // Fails/throws
   //semver-e.minor = 15
-```toit
+```
 However, there is an easy way to quickly create a new instance with one or
 more changed properties:
-```
+```toit
   // (Continues from previous examples.)
 
   // Create semver-e-new with minor now = 15
