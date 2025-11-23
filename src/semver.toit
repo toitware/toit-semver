@@ -11,7 +11,8 @@ A semantic versioning library.
 See https://semver.org/ for details.
 */
 
-USE-PEG ::= true
+// Use this to test the two parsers.
+USE-PEG ::= false
 
 /**
 Determines if a semantic version string is valid against semver 2.0.0.
@@ -48,7 +49,7 @@ For convenience and backwards compatibility, it is possible to compare two
 
 Similar to all `compare-to` functions the `compare` function returns -1 if the
   left-hand side is less than the right-hand side; 0 if they are equal, and 1
-  otherwise.
+  otherwise.  On errors, returns `null`.
 
 Accepts flexibility switches for parsing, like `accept-leading-zeros` etc.
 */
@@ -71,7 +72,7 @@ compare input-a/string input-b/string
 /**
 Compares two semantic version strings.
 
-Overload allowing just `--if-equal`
+Overload allowing custom action block for `--if-equal`.
 */
 compare input-a/string input-b/string [--if-equal]
     --peg/bool=USE-PEG
@@ -92,7 +93,7 @@ compare input-a/string input-b/string [--if-equal]
 /**
 Compares two semantic version strings.
 
-Overload for supplying custom action block if versions are equal, and for errors.
+Overload allowing custom action blocks for `--if-equal` and `--if-error`.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error]
     --peg/bool=USE-PEG
@@ -191,10 +192,15 @@ class SemanticVersion:
   // Construct object outright using ordered arguments.
   constructor .major/any .minor/int=0 .patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
 
-  // Get version-core values in a list for simpler comparison
+  // Get version-core values in a list for simpler comparison.
   triplet -> List: return [major, minor, patch]
 
-  // Immutable - create a modified copy with selective overrides.
+  /**
+  Creates a copy of the object with supplied properties changed.
+
+  Object is normally immutable, but easier with this helper which creates a
+    changed copy.
+  */
   with --major /int? = null
        --minor /int? = null
        --patch /int? = null
@@ -226,10 +232,11 @@ class SemanticVersion:
   operator <= other/SemanticVersion -> bool:
     return (this < other) or (this == other)
 
+  // Compare two lists using semver rules.
   static compare-lists-less-than_ l1/List l2/List -> bool:
     if (l2.size == 0) and (l1.size == 0): return false
-    if l2.size == 0: return true
-    if l1.size == 0: return false
+    if l2.size == 0: return true   // l1.size must be > 0 from earlier
+    if l1.size == 0: return false  // l2.size must be > 0 from earlier
 
     l1.size.repeat:
       // This loop has no matching cell in L2 to compare with L1.
@@ -246,8 +253,9 @@ class SemanticVersion:
         str-compare := (l1[it].compare-to l2[it])
         if str-compare == -1: return true
         else if str-compare == 1: return false
+        // Must be == at this point, continue to loop.
 
-      // Both must be numeric: ensure change from string to int.
+      // Both must be numeric: force string to int and compare.
       if l1-numeric and l2-numeric:
         l1-int := force-int_ l1[it]
         l2-int := force-int_ l2[it]
@@ -274,6 +282,7 @@ class SemanticVersion:
       throw "Unhandled variable type ($input)."
     return input-int
 
+  // Check all characters in a string are digits.
   static is-numeric_ in/any -> bool:
     if in is int: return true
     if in is string:
@@ -285,18 +294,42 @@ class SemanticVersion:
       return true
     return false
 
+  // Check if a character is a digit.
   static is-digit_ c/int -> bool:
     return '0' <= c <= '9'
 
+
+
+  /**
+  Compares two semantic version objects.
+
+  Similar to all `compare-to` functions the `compare` function returns -1 if the
+    left-hand side is less than the right-hand side; 0 if they are equal, and 1
+    otherwise.  On errors, returns `null`.
+
+  Overload allows custom action block for `--if-equal`.
+  */
   compare-to other/SemanticVersion -> int:
     return compare-to other --if-equal=: 0
 
-  // Text based method had a method for executing a block, for two semvers.
+
+  /**
+  Compares two semantic version objects.
+
+  Similar to all `compare-to` functions the `compare` function returns -1 if the
+    left-hand side is less than the right-hand side; and 1 otherwise.  On
+    errors, returns `null`.
+
+  This overload allows custom action block for `--if-equal`.
+  */
   compare-to other/SemanticVersion [--if-equal] -> int:
     if this < other: return -1
     if this == other: return if-equal.call
     return 1
 
+  /**
+  A string representation of the object.
+  */
   stringify -> string:
     str := "$major.$minor.$patch"
     if not pre-releases.is-empty:
@@ -308,18 +341,6 @@ class SemanticVersion:
   hash-code:
     return major + 1000 * minor + 1000000 * patch
 
-  // Check
-  // - if no pre-releases data then should return true
-  // - if no build-metadata data then should return true
-  /* I dont think this is used anywhere.  Teting Pending deletion.
-  is-valid -> bool:
-    if major == null: return false
-    if minor == null: return false
-    if patch == null: return false
-    if pre-releases == null: return false
-    if build-metadata == null: return false
-    return true
-  */
 
 class SemanticVersionTXTParser:
   source/string := ?
@@ -337,7 +358,8 @@ class SemanticVersionTXTParser:
 
   // MODIFIED FLORIAN CODE BELOW HERE ------------------------------------------
 
-  // Used this function definition only because the PEG parser did it...
+  // Used this function definition only because the PEG parser did it - tried to
+  // keep the signature of the two classes the same.
   semantic-version --consume-all/bool=false -> SemanticVersion?:
     builder := source
     if builder.starts-with "v" or builder.starts-with "V":
@@ -447,6 +469,7 @@ class SemanticVersionTXTParser:
   - If both are integers compare them.
   - If both are strings compare them.
   */
+  /* propose deletion
   compare-dotted_ a/string b/string -> int:
     a-parts := a.split "."
     b-parts := b.split "."
@@ -484,14 +507,17 @@ class SemanticVersionTXTParser:
         if comp != 0: return comp
 
     return 0
+  */
 
   /*
   Compares two semver strings.
 
   Returns -1 if $a < $b, 0 if $a == $b and 1 if $a > $b.
   */
+  /* propose deletion
   compare a/string b/string -> int:
     return compare a b --if-equal=: 0
+  */
 
   /*
   Compares two semver strings.
@@ -502,6 +528,8 @@ class SemanticVersionTXTParser:
   Any leading 'v' or 'V' of $a or $b is stripped.
   */
   // See https://semver.org/#spec-item-11.
+
+  /* propose deletion
   compare a/string b/string [--if-equal]:
     if a.starts-with "v" or a.starts-with "V": a = a[1..]
     if b.starts-with "v" or b.starts-with "V": b = b[1..]
@@ -532,6 +560,7 @@ class SemanticVersionTXTParser:
     comp := compare-dotted_ a-prerelease b-prerelease
     if comp != 0: return comp
     return if-equal.call
+  */
 
   is-letter_ c/int -> bool:
     return 'A' <= c <= 'Z' or 'a' <= c <= 'z'
@@ -576,6 +605,7 @@ class SemanticVersionTXTParser:
     major, minor and patch version. Otherwise it is enough to have a major
     version (or a major and minor version).
   */
+  /* propose deletion
   is-valid str/string --allow-v/bool=true --require-major-minor-patch/bool=true -> bool:
     if allow-v and (str.starts-with "v" or str.starts-with "V"):
       str = str[1..]
@@ -607,7 +637,7 @@ class SemanticVersionTXTParser:
       if part.size > 1 and part[0] == '0': return false
 
     return true
-
+  */
 
 // ORIGINAL PEG PARSER CODE BELOW HERE -----------------------------------------
 
