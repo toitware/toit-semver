@@ -232,14 +232,15 @@ class SemanticVersion:
   operator <= other/SemanticVersion -> bool:
     return (this < other) or (this == other)
 
-  // Compare two lists using semver rules.
+  // Compare two lists using semver rules.  Works for version-core lists, as
+  // well as pre-release lists.
   static compare-lists-less-than_ l1/List l2/List -> bool:
     if (l2.size == 0) and (l1.size == 0): return false
     if l2.size == 0: return true   // l1.size must be > 0 from earlier
     if l1.size == 0: return false  // l2.size must be > 0 from earlier
 
     l1.size.repeat:
-      // This loop has no matching cell in L2 to compare with L1.
+      // No matching cell in L2 to compare with L1.
       if l2.size < (it + 1) : return false
 
       // One string and one int:  Numeric always less than a string.
@@ -253,7 +254,7 @@ class SemanticVersion:
         str-compare := (l1[it].compare-to l2[it])
         if str-compare == -1: return true
         else if str-compare == 1: return false
-        // Must be == at this point, continue to loop.
+        // Must be == at this point, continue to next loop.
 
       // Both must be numeric: force string to int and compare.
       if l1-numeric and l2-numeric:
@@ -262,7 +263,7 @@ class SemanticVersion:
         if l1-int < l2-int: return true
         if l1-int > l2-int: return false
 
-      // Must be l1[it] == l2[it] so loop to next.
+      // Must be l1[it] == l2[it] continue to next loop.
 
     // At this point, we've got to the end of L1, there may be more L2 left.
     // Therefore at L1 is < L2, and therefore this must be true.
@@ -298,8 +299,6 @@ class SemanticVersion:
   static is-digit_ c/int -> bool:
     return '0' <= c <= '9'
 
-
-
   /**
   Compares two semantic version objects.
 
@@ -311,7 +310,6 @@ class SemanticVersion:
   */
   compare-to other/SemanticVersion -> int:
     return compare-to other --if-equal=: 0
-
 
   /**
   Compares two semantic version objects.
