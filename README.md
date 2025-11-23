@@ -113,7 +113,7 @@ as a list and must be specified as a list, even if only one element:
 Since the object is immutable, editing one of the fields after creation is not
 possible.
 ```toit
-  // (Continues from previous examples)
+  // (Continues from previous examples.)
 
   // Direct instantiation including pre-release.
   semver-e := SemanticVersion 1 2 3 --pre-releases=["alpha",1]
@@ -130,7 +130,7 @@ possible.
 However, there is an easy way to quickly create a new instance with one or
 more changed properties:
 ```
-  // (Continues from previous examples)
+  // (Continues from previous examples.)
 
   // Create semver-e-new with minor now = 15
   semver-e-new := semver-e.with --minor=15
@@ -142,7 +142,7 @@ more changed properties:
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
 ```toit
-  // (Continues from previous examples).
+  // (Continues from previous examples.).
 
   string-f := "1.0.0"
   string-g := "1.0.0-beta.1"
@@ -179,7 +179,7 @@ them for comparison.
 Similar to all `compare-to` functions the `compare` function returns -1 if the left-hand side is less
 than the right-hand side; 0 if they are equal, and 1 otherwise.
 ```toit
-  // Continues from previous examples
+  // (Continues from previous examples.)
 
   // Create strings
   v1 := "1.0.0"
@@ -206,7 +206,7 @@ code to crash/stop):
 | `.parse "1.2" --accept-missing-patch` | Will parse as `1.2.0` |
 | `.parse "1.2.03" --accept-leading-zeros` | This, and other variations like `1.02.3`, `001.002.003` will all parse as `1.2.3` |
 | `.parse "v1.2.3" --accept-v` |  parses as `1.2.3` |
-| `.parse "1.a.3" --non-throwing` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will generate `null` instead. (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces)) |
+| `.parse "1.a.3" --if-error=(: null)` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block instead, in this case producing `null` as the result.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces)) |
 
 #### Example Combinations and Exceptions :
 Switches can work in combination, as per the following examples:
@@ -215,5 +215,5 @@ Switches can work in combination, as per the following examples:
 | `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, but still expects `minor`. |
 | `.parse "1" --accept-missing-patch --if-error=(: null)` | Invokes the `if-error` block since a `minor` is missing, thus returning `null`. |
 | `.parse 1.54` | In this case 1.2 is a `float`. Floats are not accepted for parsing due to ambiguities about how the decimal parts would be handled. |
-| `.parse "v1.2.3" --non-throwing` | Will return `null`.  The presence of `V` would normally throw without the `--accept-v` switch. |
+| `.parse "v1.2.3" --if-error=(: null)` | Will return `null`.  The presence of `V` would normally throw without the `--accept-v` switch. |
 | `.parse "1.2.3-beta-2.3"` | Parses, but potentially not in the expected way.  The second `-` is allowed but becomes part of the first string, not a delimiter for a second. So actually parses as `pre-releases[0] = "beta-2"` and `pre-releases[1] = "3"`.  The difference is not seen when turned back into a string.  Complications would be noticed though during comparisons, which iterate through the set of pre-release strings one by one. |
