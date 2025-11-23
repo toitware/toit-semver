@@ -49,10 +49,10 @@ string.  Parsing operates as shown in the table below:
 | `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
 | `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Fails parsing but can be parsed with a switch. |
 | `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Fails parsing, but can be parsed with a switch. |
-| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a switch that drops the leading `v`. |
+| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a switch that ignores the leading `v`. |
 | `1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a switch. |
 |`1.0.0-beta`| Compliant | Accepted, but `pre-release` definition could be confusing. Suggest using `1.0.0-beta.1` | :green_circle: Parses successfully. |
-| `1.0.0.1` | Not compliant | Uses four parts.  Last delimiter should be `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
+| `1.0.0.1` | Not compliant | Use of four parts is not compliant.  If a pre-release/build-metadata was intended, the last delimiter should have been `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
 
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
@@ -126,7 +126,7 @@ possible.
 
   // Fails/throws
   //semver-e.minor = 15
-```
+```toit
 However, there is an easy way to quickly create a new instance with one or
 more changed properties:
 ```
@@ -159,9 +159,9 @@ and functions.  Comparison operators are shown in the example below.
 
   // compare two objects: prints "f and g are different."
   if semver-f == semver-g:
-    print "a and b are the same."
+    print "f and g are the same."
   else:
-    print "a and b are different."
+    print "f and g are different."
 
   // compare two objects: prints "f and f are the same."
   if semver-f == semver-f:
@@ -172,12 +172,14 @@ and functions.  Comparison operators are shown in the example below.
 ```
 
 #### Simple comparison using strings only:
-For convenience and backwards compatibility, it is also possible to compare strings directly. In
-the background the library creates the corresponding `SemanticVersion` instances and uses
-them for comparison.
+For convenience and backwards compatibility, it is also possible to compare
+strings directly without creating the objects. In the background the library
+creates the corresponding `SemanticVersion` object anyway, and uses the built-in
+functions/methods for comparison.
 
-Similar to all `compare-to` functions the `compare` function returns -1 if the left-hand side is less
-than the right-hand side; 0 if they are equal, and 1 otherwise.
+Similar to all `compare-to` functions the `compare` function returns -1 if the
+left-hand side is less than the right-hand side; 0 if they are equal, and 1
+otherwise.
 ```toit
   // (Continues from previous examples.)
 
@@ -198,13 +200,14 @@ than the right-hand side; 0 if they are equal, and 1 otherwise.
 
 ## Switches relaxing some parsing rules
 This library allows several switches that relax some of the rules in order to
-prevent parsing failures that normally throw an error (eg, potentially causing
-code to crash/stop):
+prevent parsing failures that normally throw an error (which may otherwise
+potentially cause code to crash/stop):
 | Example switch | Examples using the switch |
 | - | - |
-| `.parse "1" --accept-missing-minor` |  Will parse as `1.0.0`.  (Also assumes `--accept-missing-patch`) `1.2` will fail without the next switch. |
+| `.parse "1" --accept-missing-minor` |  Will parse as `1.0.0`. |
+| `.parse "1.4" --accept-missing-minor` |  Will not parse - missing `--accept-missing-patch`. |
 | `.parse "1.2" --accept-missing-patch` | Will parse as `1.2.0` |
-| `.parse "1.2.03" --accept-leading-zeros` | This, and other variations like `1.02.3`, `001.002.003` will all parse as `1.2.3` |
+| `.parse "1.2.03" --accept-leading-zeros` | This, and other variations like `1.02.3`, `001.002.003` will all parse as `1.2.3`.  Also accepts leading zeros on numeric `--pre-releases`, which normally would not parse. |
 | `.parse "v1.2.3" --accept-v` |  parses as `1.2.3` |
 | `.parse "1.a.3" --if-error=(: null)` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block instead, in this case producing `null` as the result.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces)) |
 
