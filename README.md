@@ -168,7 +168,22 @@ and functions.  Comparison operators are shown in the example below.
     print "f and f are the same."
   else:
     print "f and f are different."
+```
+If a string does not parse, it will throw an error unless `--if-error` block is
+supplied, as per this example:
+```toit
+  // (Continues from previous examples.).
 
+  // Has 4 parts to the version-core, will not parse.
+  string-h := "1.0.0.5-beta.1"
+
+  // Parses with the --if-error switch.  Will not throw but execute/return the
+  // block when parsing fails.
+  semver-h := SemanticVersion.parse string-h --if-error=(: null)
+
+  // Prints 'is null'
+  if not semver-h:
+    print "is null"
 ```
 
 #### Simple comparison using strings only:
