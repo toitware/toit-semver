@@ -260,7 +260,7 @@ class SemanticVersion:
         l1-int := force-int_ l1[it]
         l2-int := force-int_ l2[it]
         if l1-int < l2-int: return true
-        if l2-int > l1-int: return false
+        if l1-int > l2-int: return false
 
       // Must be l1[it] == l2[it] so loop to next.
 
