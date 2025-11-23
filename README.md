@@ -46,13 +46,13 @@ One way to create a `SemanticVersion` object is to have the library parse a
 string.  Parsing operates as shown in the table below:
 | Example | Compliant? | Explanation | Parsing Result |
 | - | - | - | - |
-| `1.2.3`| Compliant | As per definition | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
-| `1.2` | Not strictly compliant | Missed `patch` | :yellow_circle: Fails parsing but can be parsed with a switch. |
-| `1` | Not strictly compliant | Misses `minor` and `patch` | :yellow_circle: Fails parsing, but can be parsed with a switch. |
-| `v1.2.3` | Not strictly compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a switch that ignores the leading `v`. |
-| `1.02.3` | Not strictly compliant | Has a leading `0` in `minor` | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a switch. |
-|`1.0.0-beta`| Compliant | Accepted, but `pre-release` definition could be confusing. Suggest using `1.0.0-beta.1` | :green_circle: Parses successfully. |
-| `1.0.0.1` | Not compliant | Use of four parts is not compliant.  If a pre-release/build-metadata was intended, the last delimiter should have been `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
+| `1.2.3` | Compliant | As per definition. | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
+| `1.2` | Not compliant | Missing `patch`. | :yellow_circle: Fails parsing but can be parsed with a switch. |
+| `1` | Not compliant | Missing `minor` and `patch`. | :yellow_circle: Fails parsing, but can be parsed with a switch. |
+| `v1.2.3` | Not compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a switch that ignores the leading `v`. |
+| `1.02.3` | Not compliant. | Has a leading `0` in `minor`. | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a [switch](#switches-relaxing-some-parsing-rules). |
+| `1.0.0-beta` | Compliant. | Accepted, but `pre-release` definition could be confusing. Suggest using `1.0.0-beta.1` | :green_circle: Parses successfully. |
+| `1.0.0.1` | Not compliant. | Use of four parts is not compliant.  If a pre-release/build-metadata was intended, the last delimiter should have been `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
 
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
 
