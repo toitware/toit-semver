@@ -338,6 +338,7 @@ class SemanticVersion:
     return major + 1000 * minor + 1000000 * patch
 
 
+
 class SemanticVersionTXTParser_:
   source/string := ?
   accept-version-core-zero/bool
