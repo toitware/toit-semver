@@ -138,11 +138,11 @@ main:
   test "Leading 0" LEADING-0
   test "Build & Metadata" BUILD-METADATA
   test "Mangled" MANGLED
-  test "Visual" VISUAL-CHECK --visual
+  test "Visual" VISUAL-CHECK
 
   exit exit-code
 
-test label/string tests/List --visual=false:
+test label/string tests/List:
   print "Test: $label.to-ascii-upper"
   tests.do: | entry/List |
     result := ""
