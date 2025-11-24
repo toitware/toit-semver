@@ -158,7 +158,7 @@ test label/string tests/List --visual=false:
       exit-code = 1
 
     if parsed:
-      result += "[$a] parsed successfully as [$attempt]"
+      result += "[$a] parsed successfully as [$actual]"
     else:
       result += "[$a] FAILED parsing. "
 
