@@ -354,10 +354,6 @@ class SemanticVersionTXTParser_:
       --.accept-leading-zeros=false
       --.accept-v=false:
 
-  // MODIFIED FLORIAN CODE BELOW HERE ------------------------------------------
-
-  // Used this function definition only because the PEG parser did it - tried to
-  // keep the signature of the two classes the same.
   semantic-version --consume-all/bool=false -> SemanticVersion?:
     builder := source
     if builder.starts-with "v" or builder.starts-with "V":
@@ -441,9 +437,6 @@ class SemanticVersionTXTParser_:
     if exception:
       return if-error.call exception
     return null
-
-
-  // ORIGINAL FLORIAN CODE BELOW HERE ------------------------------------------
 
   split-semver_ semver/string:
     plus-index := semver.index-of "+"
