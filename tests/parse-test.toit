@@ -8,6 +8,8 @@ import semver show *
 PASS := true
 FAIL := false
 
+exit-code := 0
+
 TESTS ::= [
   ["1.0.0-alpha", PASS],
   ["11.0.0-alpha", PASS],
@@ -75,7 +77,7 @@ PRERELEASE ::= [
   ["1.0.0-beta.90-beta.90", PASS]
 ]
 
-// Leading 0 is not valid semver, but we support it in comparisons.
+// Leading 0 is not valid semver, but we support it in comparisons using the switch.
 LEADING-0 ::= [
   ["01.0.0", PASS],
   ["01.0.0", PASS],
@@ -101,28 +103,28 @@ BUILD-METADATA ::= [
 ]
 
 MANGLED ::= [
-  ["1-b+a", PASS],       // pre-release and build-metadata reversed
-  ["1.4.0-0", PASS],     // pre-release starts with non alpha
-  ["1.4.0-", FAIL],      // nothing after -
-  ["1.0.0-b+a", PASS],   // pre-release and build-metadata reversed
-  ["1.4.0-0", PASS],     // pre-release starts with non alpha
-  ["1.4.0-", FAIL],      // nothing after -
-  ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS], // more than one pre-release
-  ["1.4.0-build.3928-build.3928+sha.3928+sha.a8d9d4f", FAIL],   // more than one build-metadata
-  ["1.4.0-build.3928-bu.3-bu.sdsd+s928+sa.4f", FAIL],           // more than one of both
-  ["1.4.0-build.3928-bu.3+s928-bu.sdsd+sa.4f", FAIL],           // alternating
-  ["1.4.0++sha.a8d9d4f", FAIL], // two delimiter characters together
-  ["1.4.0--sha.a8d9d4f", PASS], // two delimiter characters together
-  ["1.0.ab", FAIL],      // letters where numbers should be
-  ["1.ab.0", FAIL],      // letters where numbers should be
-  ["a.1.0", FAIL]        // letters where numbers should be
+  ["1-b+a", PASS],       // Pre-release and build-metadata reversed.
+  ["1.4.0-0", PASS],     // Pre-release starts with non alpha.
+  ["1.4.0-", FAIL],      // Nothing after -.
+  ["1.0.0-b+a", PASS],   // Pre-release and build-metadata reversed.
+  ["1.4.0-0", PASS],     // Pre-release starts with non alpha.
+  ["1.4.0-", FAIL],      // Nothing after -.
+  ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS], // More than one pre-release.
+  ["1.4.0-build.3928-build.3928+sha.3928+sha.a8d9d4f", FAIL],   // More than one build-metadata.
+  ["1.4.0-build.3928-bu.3-bu.sdsd+s928+sa.4f", FAIL],           // More than one of both.
+  ["1.4.0-build.3928-bu.3+s928-bu.sdsd+sa.4f", FAIL],           // Alternating.
+  ["1.4.0++sha.a8d9d4f", FAIL], // Two delimiter characters together.
+  ["1.4.0--sha.a8d9d4f", PASS], // Two delimiter characters together.
+  ["1.0.ab", FAIL],      // Letters where numbers should be.
+  ["1.ab.0", FAIL],      // Letters where numbers should be.
+  ["a.1.0", FAIL]        // Letters where numbers should be.
 ]
 
 VISUAL-CHECK ::= [
   ["1.0.0+a-b", PASS],
   ["1.0.0+a-z.A-Z.0-9.00", PASS],
   ["1.0.0-beta.90-beta.90", PASS],
-  // more than one '-' is allowed - all later -'s treated as part of the string.
+  // More than one '-' is allowed - all later -'s treated as part of the string.
   ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS],
 ]
 
@@ -138,6 +140,7 @@ main:
   test "Mangled" MANGLED
   test "Visual" VISUAL-CHECK --visual
 
+  exit exit-code
 
 test label/string tests/List --visual=false:
   print "Test: $label.to-ascii-upper"
@@ -157,5 +160,6 @@ test label/string tests/List --visual=false:
       result += "[$a] parsed successfully as [$attempt]"
     else:
       result += "[$a] FAILED parsing. "
+      exit-code = 1
 
     print result

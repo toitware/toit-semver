@@ -21,14 +21,12 @@ In the background the library creates the corresponding `SemanticVersion`
   instance and uses it for parsing.  This function accepts switches like
   `accept-leading-zeros` etc.
 */
-is-valid
-    input/string
+is-valid input/string -> bool
     --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
-    --accept-v/bool=false
-    -> bool:
+    --accept-v/bool=false:
 
   // Normalize to SemanticVersion.  If fails, then is invalid.
   parsed-input := SemanticVersion.parse input
@@ -53,13 +51,12 @@ Similar to all `compare-to` functions the `compare` function returns -1 if the
 
 Accepts flexibility switches for parsing, like `accept-leading-zeros` etc.
 */
-compare input-a/string input-b/string
+compare input-a/string input-b/string -> int
     --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
-    --accept-v/bool=false
-    -> int:
+    --accept-v/bool=false:
   return compare input-a input-b
     --peg=peg
     --accept-missing-minor=accept-missing-minor
@@ -74,13 +71,12 @@ Compares two semantic version strings.
 
 Overload allowing custom action block for `--if-equal`.
 */
-compare input-a/string input-b/string [--if-equal]
+compare input-a/string input-b/string [--if-equal] -> int
     --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
-    --accept-v/bool=false
-    -> int:
+    --accept-v/bool=false:
   return compare input-a input-b
     --peg=peg
     --accept-missing-minor=accept-missing-minor
@@ -95,13 +91,12 @@ Compares two semantic version strings.
 
 Overload allowing custom action blocks for `--if-equal` and `--if-error`.
 */
-compare input-a/string input-b/string [--if-equal] [--if-error]
+compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
-    --accept-v/bool=false
-    -> int:
+    --accept-v/bool=false:
 
   // Normalize both sides to SemanticVersion
   a/SemanticVersion? := SemanticVersion.parse input-a
@@ -123,7 +118,6 @@ compare input-a/string input-b/string [--if-equal] [--if-error]
     throw "compare: Unable to parse one (or both) inputs."
   return a.compare-to b --if-equal=if-equal
 
-
 class SemanticVersion:
   major/int
   minor/int
@@ -132,14 +126,13 @@ class SemanticVersion:
   build-metadata/List
 
   // Accepts --if-error block
-  static parse input/string
+  static parse input/string  -> SemanticVersion?
       --peg=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
       --accept-leading-zeros/bool=false
       --accept-v/bool=false
-      [--if-error]
-      -> SemanticVersion?:
+      [--if-error]:
 
     parsed := ?
     if peg:
@@ -160,13 +153,12 @@ class SemanticVersion:
         --if-error=if-error
     return parsed
 
-  static parse input/string
+  static parse input/string -> SemanticVersion
       --peg=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
       --accept-leading-zeros/bool=false
-      --accept-v/bool=false
-      -> SemanticVersion?:
+      --accept-v/bool=false:
 
     parsed := ?
     if peg:
