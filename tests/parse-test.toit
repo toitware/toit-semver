@@ -129,26 +129,24 @@ VISUAL-CHECK ::= [
 ]
 
 main:
-  test "Tests" TESTS
-  test "Single" SINGLE-SEGMENT
-  test "Two" TWO-SEGMENT
-  test "Three" THREE-SEGMENT
-  test "Four" FOUR-SEGMENT
-  test "Pre-release" PRERELEASE
-  test "Leading 0" LEADING-0
-  test "Build & Metadata" BUILD-METADATA
-  test "Mangled" MANGLED
-  test "Visual" VISUAL-CHECK
+  test TESTS
+  test SINGLE-SEGMENT
+  test TWO-SEGMENT
+  test THREE-SEGMENT
+  test FOUR-SEGMENT
+  test PRERELEASE
+  test LEADING-0
+  test BUILD-METADATA
+  test MANGLED
+  test VISUAL-CHECK
 
   exit exit-code
 
-test label/string tests/List:
-  print "Test: $label.to-ascii-upper"
+test tests/List:
   tests.do: | entry/List |
     result := ""
     a := entry[0]
     expected := entry[1]
     actual := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --accept-version-core-zero --if-error=(: null))
 
-    print "- testing: $a (expecting: $expected)"
     expect-equals expected actual
