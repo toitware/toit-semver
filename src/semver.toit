@@ -3,7 +3,6 @@
 // in the LICENSE file.
 
 import log
-import encoding.yaml.parser
 
 /**
 A semantic versioning library.
@@ -35,8 +34,8 @@ is-valid input/string -> bool
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
     --accept-v=accept-v
-    --if-error=(: null)
-  return (parsed-input != null)
+    --if-error=(: return false)
+  return true
 
 /**
 Compares two semantic version strings.
@@ -83,13 +82,15 @@ compare input-a/string input-b/string [--if-equal] -> int
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
     --accept-v=accept-v
-    --if-error=(: null)
+    --if-error=(: throw it)
     --if-equal=if-equal
 
 /**
-Compares two semantic version strings.
+Variant of $(compare a b).
 
-Overload allowing custom action blocks for `--if-equal` and `--if-error`.
+Calls the given $if-equal block if $input-a and $input-b compare as equal.
+
+Calls $if-error if either input can't be parsed.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --peg/bool=USE-PEG
@@ -99,23 +100,22 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --accept-v/bool=false:
 
   // Normalize both sides to SemanticVersion
-  a/SemanticVersion? := SemanticVersion.parse input-a
+  a := SemanticVersion.parse input-a
     --peg=peg
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
     --accept-v=accept-v
-    --if-error=if-error
-  b/SemanticVersion? := SemanticVersion.parse input-b
-    --peg=peg
-    --accept-missing-minor=accept-missing-minor
-    --accept-missing-patch=accept-missing-patch
-    --accept-leading-zeros=accept-leading-zeros
-    --accept-v=accept-v
-    --if-error=if-error
+    --if-error=: return if-error.call it
 
-  if (a is not SemanticVersion) or (b is not SemanticVersion):
-    throw "compare: Unable to parse one (or both) inputs."
+  b := SemanticVersion.parse input-b
+    --peg=peg
+    --accept-missing-minor=accept-missing-minor
+    --accept-missing-patch=accept-missing-patch
+    --accept-leading-zeros=accept-leading-zeros
+    --accept-v=accept-v
+    --if-error=: return if-error.call it
+
   return a.compare-to b --if-equal=if-equal
 
 class SemanticVersion:
@@ -126,7 +126,7 @@ class SemanticVersion:
   build-metadata/List
 
   // Accepts --if-error block
-  static parse input/string  -> SemanticVersion?
+  static parse input/string  -> SemanticVersion
       --peg=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
@@ -144,7 +144,7 @@ class SemanticVersion:
         --consume-all
         --if-error=if-error
     else:
-      parsed = (SemanticVersionTXTParser input
+      parsed = (SemanticVersionTXTParser_ input
         --accept-missing-minor=accept-missing-minor
         --accept-missing-patch=accept-missing-patch
         --accept-leading-zeros=accept-leading-zeros
@@ -169,7 +169,7 @@ class SemanticVersion:
         --accept-v=accept-v).semantic-version
         --consume-all
     else:
-      parsed = (SemanticVersionTXTParser input
+      parsed = (SemanticVersionTXTParser_ input
         --accept-missing-minor=accept-missing-minor
         --accept-missing-patch=accept-missing-patch
         --accept-leading-zeros=accept-leading-zeros
@@ -178,10 +178,16 @@ class SemanticVersion:
     return parsed
 
 
-  // Construct object outright using switches.
+  /**
+  Construct SemanticVersion object using switches.
+  */
   constructor --.major/int --.minor/int=0 --.patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
 
-  // Construct object outright using ordered arguments.
+  /**
+  Construct SemanticVersion object using ordered arguments.
+
+  Must be provided in this order: major then minor then patch.
+  */
   constructor .major/any .minor/int=0 .patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
 
   // Get version-core values in a list for simpler comparison.
@@ -193,7 +199,7 @@ class SemanticVersion:
   Object is normally immutable, but easier with this helper which creates a
     changed copy.
   */
-  with --major /int? = null
+  with --major /int? = null -> SemanticVersion
        --minor /int? = null
        --patch /int? = null
        --pre-release /List? = null
@@ -228,30 +234,30 @@ class SemanticVersion:
   // well as pre-release lists.
   static compare-lists-less-than_ l1/List l2/List -> bool:
     if (l2.size == 0) and (l1.size == 0): return false
-    if l2.size == 0: return true   // l1.size must be > 0 from earlier
-    if l1.size == 0: return false  // l2.size must be > 0 from earlier
+    if l2.size == 0: return true   // l1.size must be > 0 from earlier.
+    if l1.size == 0: return false  // l2.size must be > 0 from earlier.
 
-    l1.size.repeat:
+    l1.size.repeat: | i/int |
       // No matching cell in L2 to compare with L1.
-      if l2.size < (it + 1) : return false
+      if l2.size < (i + 1) : return false
 
       // One string and one int:  Numeric always less than a string.
-      l1-numeric := (is-numeric_ l1[it])
-      l2-numeric := (is-numeric_ l2[it])
+      l1-numeric := (is-numeric_ l1[i])
+      l2-numeric := (is-numeric_ l2[i])
       if l1-numeric and not l2-numeric: return true
       if l2-numeric and not l1-numeric: return false
 
       // Both are lexical: use Toit compare-to.
       if (not l1-numeric) and (not l2-numeric):
-        str-compare := (l1[it].compare-to l2[it])
+        str-compare := (l1[i].compare-to l2[i])
         if str-compare == -1: return true
         else if str-compare == 1: return false
         // Must be == at this point, continue to next loop.
 
       // Both must be numeric: force string to int and compare.
       if l1-numeric and l2-numeric:
-        l1-int := force-int_ l1[it]
-        l2-int := force-int_ l2[it]
+        l1-int := force-int_ l1[i]
+        l2-int := force-int_ l2[i]
         if l1-int < l2-int: return true
         if l1-int > l2-int: return false
 
@@ -288,8 +294,7 @@ class SemanticVersion:
     return false
 
   // Check if a character is a digit.
-  static is-digit_ c/int -> bool:
-    return '0' <= c <= '9'
+  static is-digit_ c/int -> bool: return '0' <= c <= '9'
 
   /**
   Compares two semantic version objects.
@@ -298,7 +303,7 @@ class SemanticVersion:
     left-hand side is less than the right-hand side; 0 if they are equal, and 1
     otherwise.  On errors, returns `null`.
 
-  Overload allows custom action block for `--if-equal`.
+  Variant allows custom action block for `--if-equal`.
   */
   compare-to other/SemanticVersion -> int:
     return compare-to other --if-equal=: 0
@@ -310,7 +315,7 @@ class SemanticVersion:
     left-hand side is less than the right-hand side; and 1 otherwise.  On
     errors, returns `null`.
 
-  This overload allows custom action block for `--if-equal`.
+  Variant allows custom action block for `--if-equal`.
   */
   compare-to other/SemanticVersion [--if-equal] -> int:
     if this < other: return -1
@@ -332,13 +337,12 @@ class SemanticVersion:
     return major + 1000 * minor + 1000000 * patch
 
 
-class SemanticVersionTXTParser:
+class SemanticVersionTXTParser_:
   source/string := ?
   accept-missing-minor/bool
   accept-missing-patch/bool
   accept-leading-zeros/bool
   accept-v/bool
-  //non-throwing/bool := false
 
   constructor .source/string
       --.accept-missing-minor/bool=false
@@ -356,7 +360,6 @@ class SemanticVersionTXTParser:
       builder = source[1..]
       if not accept-v:
         throw "'v' prefixed"
-        //return null
 
     version-core-list := []
     pre-releases-list := []
@@ -368,7 +371,7 @@ class SemanticVersionTXTParser:
       build-metadata-string := builder[plus-index + 1..]
       if build-metadata-string.size < 1:
         throw "'+' supplied, but no build-metadata string afterward."
-        //return null
+
       if not is-valid-build-metadata_ build-metadata-string:
         throw "Build-metadata string '$build-metadata-string' invalid."
       build-metadata-list = build-metadata-string.split "."
@@ -400,7 +403,6 @@ class SemanticVersionTXTParser:
 
     if (version-core-list.size == 2):
       if not accept-missing-patch and not minor-added: throw "Missing patch."
-      //return null
       version-core-list.add "0"
 
     // Now there are three.  Check each for $accept-leading-zeros
@@ -628,164 +630,3 @@ class SemanticVersionTXTParser:
 
     return true
   */
-
-// ORIGINAL PEG PARSER CODE BELOW HERE -----------------------------------------
-
-class SemanticVersionPEGParser extends parser.PegParserBase_:
-  accept-missing-minor/bool
-  accept-missing-patch/bool
-  accept-leading-zeros/bool
-  accept-v/bool
-  original-length/int := ?
-  source/string := ?
-
-  constructor .source/string
-      --.accept-missing-minor/bool=false
-      --.accept-missing-patch/bool=false
-      --.accept-leading-zeros=false
-      --.accept-v=false:
-    original-length = source.size
-    //if accept-missing-minor:
-    //  accept-missing-patch = true
-    super source.to-byte-array
-
-
-  expect-match_ char/int -> int:
-    if matched := match-char char: return matched
-    throw "Parse error, expected $(string.from-rune char) at position $current-position"
-
-  expect-numeric -> int?:
-    if number := numeric: return number
-    else:
-      throw "Parse error, expected a numeric value at position $current-position"
-
-  semantic-version --consume-all/bool=false -> SemanticVersion:
-    //print "Doing: $source"
-    if accept-v:
-      optional: (match-string "v") or (match-string "V")
-    version-core-list := version-core
-    pre-releases-list := pre-releases
-    build-metadata-list := build-metadata
-
-    if pre-releases-list.size == 1:
-      if pre-releases-list[0] == "":
-        throw "Pre-release is an empty string."
-
-    if build-metadata-list.size == 1:
-      if build-metadata-list[0] == "":
-        throw "Build-metadata contains empty string."
-
-    if consume-all and not eof:
-      throw "Parse error, not all input was consumed ($(original-length - current-position) remaining.)"
-      // not returned
-    return SemanticVersion
-      version-core-list[0]
-      version-core-list[1]
-      version-core-list[2]
-      --pre-releases=pre-releases-list
-      --build-metadata=build-metadata-list
-
-  semantic-version --consume-all/bool=false [--if-error] -> SemanticVersion?:
-    exception := catch :
-      // Delegate to the throwing overload so the real work lives in ONE place.
-      return semantic-version --consume-all=consume-all
-
-    if exception:
-      return if-error.call exception
-    return null
-
-  version-core -> List:
-    major := expect-numeric
-    minor/int? := null
-    patch/int? := null
-    if accept-missing-minor:
-      if match-char '.':
-        minor = expect-numeric
-        if accept-missing-patch:
-          if match-char '.':
-            patch = expect-numeric
-          else:
-            patch = 0
-        else:
-          // Should never happen as can't have minor missing
-          // whilst having patch present.
-          patch = expect-match_ '.'
-          patch = expect-numeric
-      else:
-        minor = 0
-        patch = 0
-    else:
-      minor = expect-match_ '.'
-      minor = expect-numeric
-      if accept-missing-patch:
-        if match-char '.':
-          patch = expect-numeric
-        else:
-          patch = 0
-      else:
-        patch = expect-match_ '.'
-        patch = expect-numeric
-    return [major, minor, patch]
-
-  pre-releases -> List:
-    try-parse:
-      result := []
-      if match-char '-':
-        while true:
-          if pre-release-result := pre-release: result.add pre-release-result
-          else: break
-          if not match-char '.': return result
-    return []
-
-  build-metadata -> List:
-    try-parse:
-      result := []
-      if match-char '+':
-        while true:
-          result.add build-number
-          if not match-char '.': return result
-    return []
-
-  pre-release -> any:
-    if alphanumeric-result := alphanumeric: return alphanumeric-result
-    if numeric-result := numeric: return numeric-result
-    throw "Parse error in pre-release, expected an identifier or a number at position $current-position"
-
-  build-number -> string?:
-    if alphanumeric-result := alphanumeric: return alphanumeric-result
-    try-parse:
-      mark := mark
-      if (repeat --at-least-one: digit):
-        return string-since mark
-    throw "Parse error in build-number, expected an identifier or digits at position $current-position"
-
-  alphanumeric -> string?:
-    mark := mark
-    try-parse:
-      if (repeat: digit) and
-         non-digit and                // ** was letter, then non-digit, then...
-         (repeat: identifier-char):
-        return string-since mark
-    return null
-
-  identifier-char -> bool:
-    return digit or non-digit
-
-  non-digit -> bool:
-    if match-char '-' or letter: return true
-    return false
-
-  numeric -> int?:
-    if not accept-leading-zeros and (match-char '0'): return 0
-    mark := mark
-    try-parse:
-      if digit and (repeat: digit):
-        return int.parse (string-since mark)
-    return null
-
-  digit -> bool:
-    return (match-range '0' '9') != null
-
-  letter -> bool:
-    return (match-range 'a' 'z') != null or
-           (match-range 'A' 'Z') != null
