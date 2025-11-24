@@ -46,14 +46,11 @@ main:
   expect-not (semver.is-valid "v1.0.0")
   expect (semver.is-valid "v1.0.0" --accept-v)
 
-  // Needed to drop --no-require-major-minor-patch: can't start with "no".
-  // changed to
   expect (semver.is-valid "1" --accept-missing-minor)
   expect-not (semver.is-valid "1")
   expect-not (semver.is-valid "1.2" --accept-missing-minor)
   expect (semver.is-valid "1.2" --accept-missing-patch)
   expect (semver.is-valid "1.2.3" --accept-missing-minor)
-
 
   expect (semver.is-valid "1-alpha" --accept-missing-minor --accept-missing-patch)
   expect (semver.is-valid "1.2-alpha" --accept-missing-patch)
