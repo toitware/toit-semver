@@ -80,7 +80,6 @@ main:
   expect-equals -1 (semver.compare "10.0.0" "10.114" --accept-missing-minor --accept-missing-patch)
   expect-equals -1 (semver.compare "1.0" "1.4.1" --accept-missing-minor --accept-missing-patch)
 
-
   expect-equals 1 (semver.compare "1.0.0-alpha.1" "1.0.0-alpha" --accept-missing-minor --accept-missing-patch)
 
   expect-equals -1 (semver.compare "1.0.0-alpha" "1.0.0-alpha.1")
@@ -94,7 +93,6 @@ main:
   expect-equals 1 (semver.compare "1.0.0-beta.11" "1.0.0-beta.1")
   expect-equals 1 (semver.compare "1.0.0-beta.10" "1.0.0-beta.9")
   expect-equals -1 (semver.compare "1.0.0-beta.10" "1.0.0-beta.90")
-
 
   expect-equals 0 (semver.compare "1.4.0-build.3928" "1.4.0-build.3928+sha.a8d9d4f")
   expect-equals 0 (semver.compare "1.4.0-build.3928+sha.b8dbdb0" "1.4.0-build.3928+sha.a8d9d4f")
