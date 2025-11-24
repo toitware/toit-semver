@@ -84,19 +84,19 @@ main:
   semver-a := SemanticVersion 1 2 3
 
   // Prints '1.2.3'.
-  print "$semver-a"
+  print $semver-a
 
   // Instantiation by direct creation, without 'minor'.
   semver-b := SemanticVersion 1 2
 
   // Prints '1.2.0'.
-  print "$semver-b"
+  print $semver-b
 
   // Instantiation by direct creation, without 'minor' or 'patch'.
   semver-c := SemanticVersion 1
 
   // Prints '1.0.0'.
-  print "$semver-c"
+  print $semver-c
 ```
 #### Directly creating including pre-release
 Pre-release and build-metadata can also be specified directly.  These are held
@@ -106,7 +106,7 @@ as a list and must be specified as a list, even if only one element:
   semver-d := SemanticVersion 1 0 0 --pre-releases=["alpha","1"] --build-metadata=["sha",23132]
 
   // Prints 1.0.0-alpha.1+sha.23132.
-  print "$semver-d"
+  print $semver-d
 ```
 #### Immutability
 Semver objects are immutable, but there is an easy way to create a new instance with one or more changed properties:
