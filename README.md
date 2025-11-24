@@ -35,7 +35,7 @@ reference.
 
 ### Formatting Examples
 Examples of what can be seen in practical use:
-- `0.0.0`: First official release — stable interface guaranteed moving forward.
+- `1.0.0`: First official release — stable interface guaranteed moving forward.
 - `3.0.0-alpha.1`: This would refer to unstable alpha version of v3.0.0. ".1"
   usually means first alpha of what will become version 3.0.0.
 - `2.1.0-beta+exp.sha.5114f85`: This would denotes a beta build, and gives build
@@ -46,12 +46,13 @@ One way to create a `SemanticVersion` object is to have the library parse a
 string.  Parsing operates as shown in the table below:
 | Example | Compliant? | Explanation | Parsing Result |
 | - | - | - | - |
-| `1.2.3` | Compliant | As per definition. | :green_circle: Parses as is. \\n If these values are in separate variables, it is cheaper to [create directly](#creating-the-object-directly). |
+| `1.2.3` | Compliant | As per definition. | :green_circle: Parses as is. If the individual tokens (major, minor, patch) are already separated, it is cheaper to [create an object directly](#creating-the-object-directly). |
 | `1.2` | Not compliant | Missing `patch`. | :yellow_circle: Fails parsing but can be parsed with a [switch](#switches-relaxing-some-parsing-rules). |
 | `1` | Not compliant | Missing `minor` and `patch`. | :yellow_circle: Fails parsing, but can be parsed with a [switch](#switches-relaxing-some-parsing-rules). |
 | `v1.2.3` | Not compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a [switch](#switches-relaxing-some-parsing-rules) that ignores the leading `v`. |
 | `1.02.3` | Not compliant. | Has a leading `0` in `minor`. | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a [switch](#switches-relaxing-some-parsing-rules). |
-| `1.0.0-beta` | Compliant. | Accepted, but `pre-release` definition could be confusing. Suggest using `1.0.0-beta.1` | :green_circle: Parses successfully. |
+| `1.0.0-beta` | Compliant. | Accepted. | :green_circle: Parses successfully. |
+| `1.0.0-beta.1` | Compliant. | Accepted.| :green_circle: Parses successfully. |
 | `1.0.0.1` | Not compliant. | Use of four parts is not compliant.  If a pre-release/build-metadata was intended, the last delimiter should have been `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
 
 See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder and [`parse-test.toit`](https://github.com/toitware/toit-semver/tree/main/tests/parse-test.toit) for other cases and expected outcomes.
@@ -73,7 +74,7 @@ about these.  Not all are obvious at first.  They operate in the following way:
 | `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not used when comparing. |
 
 ## Library Usage
-#### Creating the object directly:
+#### Creating the object directly
 Imports the library, and creates a `SemanticVersion` object directly.
 ```toit
 import semver show *
@@ -97,7 +98,7 @@ main:
   // Prints '1.0.0'.
   print "$semver-c"
 ```
-#### Directly creating including pre-release:
+#### Directly creating including pre-release
 Pre-release and build-metadata can also be specified directly.  These are held
 as a list and must be specified as a list, even if only one element:
 ```toit
@@ -106,39 +107,25 @@ as a list and must be specified as a list, even if only one element:
   // Direct instantiation.
   semver-d := SemanticVersion 1 0 0 --pre-releases=["alpha","1"] --build-metadata=["sha",23132]
 
-  // Prints 1.0.0-alpha.1+sha.23132
+  // Prints 1.0.0-alpha.1+sha.23132.
   print "$semver-d"
 ```
-#### Immutability:
-Since the object is immutable, editing one of the fields after creation is not
-possible.
+#### Immutability
+Semver objects are immutable, but there is an easy way to create a new instance with one or more changed properties:
 ```toit
-  // (Continues from previous examples.)
-
   // Direct instantiation including pre-release.
   semver-e := SemanticVersion 1 2 3 --pre-releases=["alpha",1]
 
-  // Prints '1.2.3-alpha.1'
-  print "$(semver-e)"
-
-  // Prints 2
-  print "$(semver-e.minor)"
-
-  // Fails/throws
-  //semver-e.minor = 15
-```
-However, there is an easy way to quickly create a new instance with one or
-more changed properties:
-```toit
-  // (Continues from previous examples.)
+  // Prints '1.2.3-alpha.1'.
+  print semver-e
 
   // Create semver-e-new with minor now = 15
   semver-e-new := semver-e.with --minor=15
 
-  // Prints '1.15.3-alpha.1'
-  print "$(semver-e-new)"
+  // Prints '1.15.3-alpha.1'.
+  print semver-e-new
 ```
-#### Object instantiation by string parsing:
+#### Object instantiation by string parsing
 The library parses strings into a `SemanticVersion` object, which has methods
 and functions.  Comparison operators are shown in the example below.
 ```toit
@@ -168,7 +155,7 @@ and functions.  Comparison operators are shown in the example below.
     print "is null"
 ```
 
-#### Simple comparison using strings only:
+#### Simple comparison using strings only
 For convenience and backwards compatibility, it is also possible to compare
 strings directly without creating the objects. In the background the library
 creates the corresponding `SemanticVersion` object anyway, and uses the built-in
@@ -208,7 +195,7 @@ potentially cause code to crash/stop):
 | `.parse "v1.2.3" --accept-v` |  Ignores the preceeding 'v', and parses as `1.2.3`. |
 | `.parse "1.a.3" --if-error=(: null)` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block instead, in this case producing `null` as the result.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces).) |
 
-#### Example Combinations and Exceptions :
+#### Example Combinations and Exceptions
 Switches can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
