@@ -6,8 +6,6 @@ import semver show *
 import expect show *
 
 main:
-  // EXAMPLE: Creating the object directly:
-
   // Instantiation by direct creation
   semver-a := SemanticVersion 1 2 3
   expect-equals "1.2.3" "$semver-a"
@@ -20,15 +18,9 @@ main:
   semver-c := SemanticVersion 1
   expect-equals "1.0.0" "$semver-c"
 
-
-  // EXAMPLE: Directly creating including pre-release
-
   // Direct instantiation.
   semver-d := SemanticVersion 1 0 0 --pre-releases=["alpha","1"] --build-metadata=["sha",23132]
   expect-equals "1.0.0-alpha.1+sha.23132" "$semver-d"
-
-
-  // EXAMPLE: Immutability
 
   // Direct instantiation including pre-release.
   semver-e := SemanticVersion 1 2 3 --pre-releases=["alpha",1]
@@ -36,9 +28,6 @@ main:
 
   // Prints 2
   expect-equals 2 semver-e.minor
-
-
-  // EXAMPLE: Object instantiation by string parsing:
 
   // strings
   string-f := "1.0.0"
@@ -68,7 +57,6 @@ main:
     print "f and f are different."
 */
 
-  // EXAMPLE: Simple comparison using strings only:
   h := "1.0.0"
   i := "1.0.0-beta.1"
 
