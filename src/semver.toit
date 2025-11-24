@@ -10,9 +10,6 @@ A semantic versioning library.
 See https://semver.org/ for details.
 */
 
-// Use this to test the two parsers.
-USE-PEG ::= false
-
 /**
 Determines if a semantic version string is valid against semver 2.0.0.
 
@@ -21,7 +18,6 @@ In the background the library creates the corresponding `SemanticVersion`
   `accept-leading-zeros` etc.
 */
 is-valid input/string -> bool
-    --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
@@ -29,7 +25,6 @@ is-valid input/string -> bool
 
   // Normalize to SemanticVersion.  If fails, then is invalid.
   parsed-input := SemanticVersion.parse input
-    --peg=peg
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -51,13 +46,11 @@ Similar to all `compare-to` functions the `compare` function returns -1 if the
 Accepts flexibility switches for parsing, like `accept-leading-zeros` etc.
 */
 compare input-a/string input-b/string -> int
-    --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
     --accept-v/bool=false:
   return compare input-a input-b
-    --peg=peg
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -71,13 +64,11 @@ Compares two semantic version strings.
 Overload allowing custom action block for `--if-equal`.
 */
 compare input-a/string input-b/string [--if-equal] -> int
-    --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
     --accept-v/bool=false:
   return compare input-a input-b
-    --peg=peg
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -93,7 +84,6 @@ Calls the given $if-equal block if $input-a and $input-b compare as equal.
 Calls $if-error if either input can't be parsed.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error] -> int
-    --peg/bool=USE-PEG
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
@@ -101,7 +91,6 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
 
   // Normalize both sides to SemanticVersion
   a := SemanticVersion.parse input-a
-    --peg=peg
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -109,7 +98,6 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --if-error=: return if-error.call it
 
   b := SemanticVersion.parse input-b
-    --peg=peg
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -127,54 +115,33 @@ class SemanticVersion:
 
   // Accepts --if-error block
   static parse input/string  -> SemanticVersion
-      --peg=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
       --accept-leading-zeros/bool=false
       --accept-v/bool=false
       [--if-error]:
 
-    parsed := ?
-    if peg:
-      parsed = (SemanticVersionPEGParser input
-        --accept-missing-minor=accept-missing-minor
-        --accept-missing-patch=accept-missing-patch
-        --accept-leading-zeros=accept-leading-zeros
-        --accept-v=accept-v).semantic-version
-        --consume-all
-        --if-error=if-error
-    else:
-      parsed = (SemanticVersionTXTParser_ input
-        --accept-missing-minor=accept-missing-minor
-        --accept-missing-patch=accept-missing-patch
-        --accept-leading-zeros=accept-leading-zeros
-        --accept-v=accept-v).semantic-version
-        --consume-all
-        --if-error=if-error
+    parsed := (SemanticVersionTXTParser_ input
+      --accept-missing-minor=accept-missing-minor
+      --accept-missing-patch=accept-missing-patch
+      --accept-leading-zeros=accept-leading-zeros
+      --accept-v=accept-v).semantic-version
+      --consume-all
+      --if-error=if-error
     return parsed
 
   static parse input/string -> SemanticVersion
-      --peg=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
       --accept-leading-zeros/bool=false
       --accept-v/bool=false:
 
-    parsed := ?
-    if peg:
-      parsed = (SemanticVersionPEGParser input
-        --accept-missing-minor=accept-missing-minor
-        --accept-missing-patch=accept-missing-patch
-        --accept-leading-zeros=accept-leading-zeros
-        --accept-v=accept-v).semantic-version
-        --consume-all
-    else:
-      parsed = (SemanticVersionTXTParser_ input
-        --accept-missing-minor=accept-missing-minor
-        --accept-missing-patch=accept-missing-patch
-        --accept-leading-zeros=accept-leading-zeros
-        --accept-v=accept-v).semantic-version
-        --consume-all
+    parsed := (SemanticVersionTXTParser_ input
+      --accept-missing-minor=accept-missing-minor
+      --accept-missing-patch=accept-missing-patch
+      --accept-leading-zeros=accept-leading-zeros
+      --accept-v=accept-v).semantic-version
+      --consume-all
     return parsed
 
 

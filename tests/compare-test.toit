@@ -46,26 +46,6 @@ THREE-SEGMENT ::= [
   ["11.0.2", "11.0.10", -1],
 ]
 
-// CHANGED
-// XXX Four-segment versions are not valid semver, but we support them in comparisons.
-// Four-segment semver are not valid semver and should be marked invalid.
-// Four-segment semver either throw, or return null and can't be compared.
-/*
-FOUR-SEGMENT ::= [
-  ["1.0.0.0", "1", 0],
-  ["1.0.0.0", "1.0", 0],
-  ["1.0.0.0", "1.0.0", 0],
-  ["1.0.0.0", "1.0.0.0", 0],
-  ["1.2.3.4", "1.2.3.4", 0],
-  ["1.2.3.4", "1.2.3.04", 0],
-  ["1.2.3.4", "01.2.3.4", 0],
-  ["1.2.3.4", "1.2.3.5", -1],
-  ["1.2.3.5", "1.2.3.4", 1],
-  ["1.0.0.0-alpha", "1.0.0-alpha", 0],
-  ["1.0.0.0-alpha", "1.0.0.0-beta", -1]
-]
-*/
-
 DIFFERENT-SEGMENT ::= [
   ["11.1.10", "11.0", 1],
   ["1.1.1", "1", 1],
@@ -119,8 +99,6 @@ main:
   test "single" SINGLE-SEGMENT
   test "two" TWO-SEGMENT
   test "three" THREE-SEGMENT
-  // Removed, see above.
-  //test "four" FOUR-SEGMENT
   test "different" DIFFERENT-SEGMENT
   test "prerelease" PRERELEASE
   test "leading 0" LEADING-0
