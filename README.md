@@ -47,10 +47,10 @@ string.  Parsing operates as shown in the table below:
 | Example | Compliant? | Explanation | Parsing Result |
 | - | - | - | - |
 | `1.2.3` | Compliant | As per definition. | :green_circle: Parses as is. If the individual tokens (major, minor, patch) are already separated, it is cheaper to [create an object directly](#creating-the-object-directly). |
-| `1.2` | Not compliant | Missing `patch`. | :yellow_circle: Fails parsing but can be parsed with a [switch](#switches-relaxing-some-parsing-rules). |
-| `1` | Not compliant | Missing `minor` and `patch`. | :yellow_circle: Fails parsing, but can be parsed with a [switch](#switches-relaxing-some-parsing-rules). |
-| `v1.2.3` | Not compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using a [switch](#switches-relaxing-some-parsing-rules) that ignores the leading `v`. |
-| `1.02.3` | Not compliant. | Has a leading `0` in `minor`. | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a [switch](#switches-relaxing-some-parsing-rules). |
+| `1.2` | Not compliant | Missing `patch`. | :yellow_circle: Fails parsing but can be parsed with an [argument](#modifying-parsing-rules). |
+| `1` | Not compliant | Missing `minor` and `patch`. | :yellow_circle: Fails parsing, but can be parsed with an [argument](#modifying-parsing-rules). |
+| `v1.2.3` | Not compliant | Has a leading `v`. Acceptable in documentation. |  :yellow_circle: Fails, but can be parsed using an [argument](#modifying-parsing-rules) that ignores the leading `v`. |
+| `1.02.3` | Not compliant. | Has a leading `0` in `minor`. | :yellow_circle: Fails parsing, but will accept and drop leading `0`'s with a [switch](#modifying-parsing-rules). |
 | `1.0.0-beta` | Compliant. | Accepted. | :green_circle: Parses successfully. |
 | `1.0.0-beta.1` | Compliant. | Accepted.| :green_circle: Parses successfully. |
 | `1.0.0.1` | Not compliant. | Use of four parts is not compliant.  If a pre-release/build-metadata was intended, the last delimiter should have been `-` or `+` to denote `pre-release` or `build-metadata` | :red_circle: Parsing fails. |
@@ -149,9 +149,8 @@ Comparison operators are shown in the example below.
   else:
     print "f and g are different."
 
-  // Prints 'is null'
-  if not semver-h:
-    print "is null"
+  // Prints 'null'
+  print semver-h:
 ```
 
 #### Simple comparison using strings only
@@ -181,21 +180,21 @@ otherwise.
 This library allows several options that relax some Semver rules.  These can be
 used to prevent parsing failures that normally throw an error (which may
 otherwise potentially cause code to crash/stop):
-| Example switch | Examples using the switch |
+| Example flag | Result of using the flag |
 | - | - |
 | `.parse "1" --accept-missing-minor` |  Will parse as `1.0.0`. |
 | `.parse "1.4" --accept-missing-minor` |  Will not parse.  Will parse with `--accept-missing-patch`. |
 | `.parse "1.2" --accept-missing-patch` | Will parse as `1.2.0`. |
 | `.parse "1.2.03" --accept-leading-zeros` | This, and other variations like `1.02.3`, `001.002.003` will all parse as `1.2.3`.  Also accepts leading zeros on numeric `--pre-releases`, which normally would not parse. |
 | `.parse "v1.2.3" --accept-v` |  Ignores the preceeding 'v', and parses as `1.2.3`. |
-| `.parse "1.a.3" [--if-error]` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block in case of error.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces).) |
+| `.parse "1.a.3" [--if-error]` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this argument will execute the supplied block in case of error.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces).) |
 
 #### Example Combinations and Exceptions
-Switches can work in combination, as per the following examples:
+Arguments can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
-| `.parse "1" --accept-missing-patch` | Throws.  The switch only excuses missing `patch`, but still expects `minor`. |
+| `.parse "1" --accept-missing-patch` | Throws.  Only excuses missing `patch`, but still expects `minor`. |
 | `.parse "1" --accept-missing-patch --if-error=(: null)` | Invokes the `if-error` block since a `minor` is missing, thus returning `null`. |
 | `.parse 1.54` | In this case 1.2 is a `float`. Floats are not accepted for parsing due to ambiguities about how the decimal parts would be handled. |
-| `.parse "v1.2.3" --if-error=(: null)` | Will return `null`.  The presence of `V` would normally throw without the `--accept-v` switch. |
+| `.parse "v1.2.3" --if-error=(: null)` | Will return `null`.  The presence of `V` would normally throw without `--accept-v`. |
 | `.parse "1.2.3-beta-2.3"` | Parses, but potentially not in the expected way.  The second `-` is allowed but becomes part of the first string, not a delimiter for a second. So actually parses as `pre-releases[0] = "beta-2"` and `pre-releases[1] = "3"`.  The difference is not seen when turned back into a string.  Complications would be noticed though during comparisons, which iterate through the set of pre-release strings one by one. |

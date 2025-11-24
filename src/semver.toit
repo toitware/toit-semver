@@ -13,11 +13,15 @@ See https://semver.org/ for details.
 /**
 Determines if a semantic version string is valid against semver 2.0.0.
 
-In the background the library creates the corresponding `SemanticVersion`
-  instance and uses it for parsing.  This function accepts switches like
-  `accept-leading-zeros` etc.
+This function accepts switches as defined in README.md:
+- `--accept-leading-zeros`
+- `--accept-missing-minor`
+- `--accept-missing-patch`
+- `--accept-v`
+- `--accept-version-core-zero`
 */
 is-valid input/string -> bool
+    --accept-version-core-zero/bool=false
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
@@ -25,6 +29,7 @@ is-valid input/string -> bool
 
   // Normalize to SemanticVersion.  If fails, then is invalid.
   parsed-input := SemanticVersion.parse input
+    --accept-version-core-zero=accept-version-core-zero
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -57,7 +62,7 @@ compare input-a/string input-b/string -> int
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
     --accept-v=accept-v
-    --if-error=(: null)
+    --if-error=(: throw it)
     --if-equal=(: 0)
 
 /**
