@@ -102,8 +102,6 @@ main:
 Pre-release and build-metadata can also be specified directly.  These are held
 as a list and must be specified as a list, even if only one element:
 ```toit
-  // (Continues from previous example)
-
   // Direct instantiation.
   semver-d := SemanticVersion 1 0 0 --pre-releases=["alpha","1"] --build-metadata=["sha",23132]
 
@@ -127,10 +125,11 @@ Semver objects are immutable, but there is an easy way to create a new instance 
 ```
 #### Object instantiation by string parsing
 The library parses strings into a `SemanticVersion` object, which has methods
-and functions.  Comparison operators are shown in the example below.
-```toit
-  // (Continues from previous examples.).
+and functions.  This function respects the options that [relax parsing
+rules](#modifying-parsing-rules).
 
+Comparison operators are shown in the example below.
+```toit
   string-f := "1.0.0"
   string-g := "1.0.0-beta.1"
 
@@ -138,13 +137,13 @@ and functions.  Comparison operators are shown in the example below.
   semver-f := SemanticVersion.parse string-f
   semver-g := SemanticVersion.parse string-g
 
-  // compare two objects: prints "f is later than g."
+  // Compare two objects: prints "f is later than g."
   if semver-f > semver-g:
     print "f is later than g."
   else:
     print "g is later than f."
 
-  // compare two objects: prints "f and g are different."
+  // Compare two objects: prints "f and g are different."
   if semver-f == semver-g:
     print "f and g are the same."
   else:
@@ -157,16 +156,12 @@ and functions.  Comparison operators are shown in the example below.
 
 #### Simple comparison using strings only
 For convenience and backwards compatibility, it is also possible to compare
-strings directly without creating the objects. In the background the library
-creates the corresponding `SemanticVersion` object anyway, and uses the built-in
-functions/methods for comparison.
+strings directly without creating the objects.
 
 Similar to all `compare-to` functions the `compare` function returns -1 if the
 left-hand side is less than the right-hand side; 0 if they are equal, and 1
 otherwise.
 ```toit
-  // (Continues from previous examples.)
-
   // Create strings
   v1 := "1.0.0"
   v1-beta := "1.0.0-beta.1"
@@ -174,18 +169,18 @@ otherwise.
   // Compare the two strings. Prints "Compare is: 1".
   print "Compare is: $(compare v1 v1-beta)"
 
-  // compare two strings: prints "Compare is: -1"
+  // Compare two strings: prints "Compare is: -1"
   print "Compare is: $(compare v1-beta v1)"
 
-  // compare two strings: prints "Compare is: 0"
+  // Compare two strings: prints "Compare is: 0"
   print "Compare is: $(compare v1 v1)"
 
 ```
 
-## Switches relaxing some parsing rules
-This library allows several switches that relax some of the rules in order to
-prevent parsing failures that normally throw an error (which may otherwise
-potentially cause code to crash/stop):
+## Modifying parsing rules
+This library allows several options that relax some Semver rules.  These can be
+used to prevent parsing failures that normally throw an error (which may
+otherwise potentially cause code to crash/stop):
 | Example switch | Examples using the switch |
 | - | - |
 | `.parse "1" --accept-missing-minor` |  Will parse as `1.0.0`. |
