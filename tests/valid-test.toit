@@ -21,8 +21,6 @@ main:
   expect (semver.is-valid "1.0.0-alpha-1")
   expect (semver.is-valid "1.0.0-rc.1+build.1")
   expect (semver.is-valid "1.0.0-01-0")
-  // should not parse
-  //expect (semver.is-valid "1.0.0---+---")
   expect (semver.is-valid "1.0.0---+---")
 
   expect-not (semver.is-valid "1")
