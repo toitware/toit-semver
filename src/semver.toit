@@ -63,7 +63,7 @@ compare input-a/string input-b/string -> int
 /**
 Compares two semantic version strings.
 
-Overload allowing custom action block for `--if-equal`.
+Variant allowing custom action block for `--if-equal`.
 */
 compare input-a/string input-b/string [--if-equal] -> int
     --accept-version-core-zero/bool=false
@@ -114,14 +114,16 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
   return a.compare-to b --if-equal=if-equal
 
 class SemanticVersion:
-  major/int
-  minor/int
-  patch/int
+  version-core/List
   pre-releases/List
   build-metadata/List
 
-  // Accepts --if-error block
-  static parse input/string  -> SemanticVersion
+  /**
+  Parses the supplied string into a SemanticVersion object.
+
+  Calls the supplied $if-error block if input can't be parsed.
+  */
+  static parse input/string  -> SemanticVersion?
       --accept-version-core-zero/bool=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
@@ -135,10 +137,14 @@ class SemanticVersion:
       --accept-missing-patch=accept-missing-patch
       --accept-leading-zeros=accept-leading-zeros
       --accept-v=accept-v).semantic-version
-      --consume-all
       --if-error=if-error
     return parsed
 
+  /**
+  Parses the supplied string into a SemanticVersion object.
+
+  Variant will throw if input can't be parsed.
+  */
   static parse input/string -> SemanticVersion
       --accept-version-core-zero/bool=false
       --accept-missing-minor/bool=false
@@ -152,24 +158,21 @@ class SemanticVersion:
       --accept-missing-patch=accept-missing-patch
       --accept-leading-zeros=accept-leading-zeros
       --accept-v=accept-v).semantic-version
-      --consume-all
+      --if-error=(: throw "PARSE_ERROR")
     return parsed
 
 
   /**
-  Construct SemanticVersion object using switches.
-  */
-  constructor --.major/int --.minor/int=0 --.patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
-
-  /**
-  Construct SemanticVersion object using ordered arguments.
+  Construct SemanticVersion object using supplied arguments.
 
   Must be provided in this order: major then minor then patch.
   */
-  constructor .major/any .minor/int=0 .patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
+  constructor major/int=0 minor/int=0 patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
+    version-core = [major, minor, patch]
 
-  // Get version-core values in a list for simpler comparison.
-  triplet -> List: return [major, minor, patch]
+    // Check all of version-core are non-zero.
+    if not (version-core.any: it > 0):
+      throw "Version-core are all zero."
 
   /**
   Creates a copy of the object with supplied properties changed.
@@ -177,18 +180,23 @@ class SemanticVersion:
   Object is normally immutable, but easier with this helper which creates a
     changed copy.
   */
-  with --major /int? = null -> SemanticVersion
-       --minor /int? = null
-       --patch /int? = null
+  with --major/int? = null -> SemanticVersion
+       --minor/int? = null
+       --patch/int? = null
        --pre-release /List? = null
        --build-metadata /List? = null:
     return SemanticVersion
-        (major or this.major)
-        (minor or this.minor)
-        (patch or this.patch)
+        (major or this.version-core[0])
+        (minor or this.version-core[1])
+        (patch or this.version-core[2])
         --pre-releases = (pre-releases or this.pre-releases)
         --build-metadata = (build-metadata or this.build-metadata)
 
+  major -> int: return version-core[0]
+  minor -> int: return version-core[1]
+  patch -> int: return version-core[2]
+
+  /*
   operator < other/SemanticVersion -> bool:
     if compare-lists-less-than_ this.triplet other.triplet: return true
     if compare-lists-less-than_ this.pre-releases other.pre-releases: return true
@@ -207,6 +215,7 @@ class SemanticVersion:
 
   operator <= other/SemanticVersion -> bool:
     return (this < other) or (this == other)
+  */
 
   // Compare two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
@@ -283,8 +292,8 @@ class SemanticVersion:
 
   Variant allows custom action block for `--if-equal`.
   */
-  compare-to other/SemanticVersion -> int:
-    return compare-to other --if-equal=: 0
+  compare-to other/SemanticVersion --compare-build-metadata=false -> int:
+    return compare-to other --compare-build-metadata=compare-build-metadata --if-equal=: 0
 
   /**
   Compares two semantic version objects.
@@ -295,9 +304,23 @@ class SemanticVersion:
 
   Variant allows custom action block for `--if-equal`.
   */
-  compare-to other/SemanticVersion [--if-equal] -> int:
-    if this < other: return -1
-    if this == other: return if-equal.call
+  compare-to other/SemanticVersion --compare-build-metadata=false [--if-equal] -> int:
+    if compare-lists-less-than_ this.version-core other.version-core:
+      if compare-lists-less-than_ this.pre-releases other.pre-releases:
+        if compare-build-metadata:
+          if compare-lists-less-than_ this.build-metadata other.build-metadata:
+            return -1
+        else:
+          return -1
+
+    if (this.version-core == other.version-core):
+      if (this.pre-releases == other.pre-releases):
+        if compare-build-metadata:
+          if (this.build-metadata == other.build-metadata):
+            return if-equal.call
+        else:
+          return if-equal.call
+
     return 1
 
   /**
