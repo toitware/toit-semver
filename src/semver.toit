@@ -46,11 +46,13 @@ Similar to all `compare-to` functions the `compare` function returns -1 if the
 Accepts flexibility switches for parsing, like `accept-leading-zeros` etc.
 */
 compare input-a/string input-b/string -> int
+    --accept-version-core-zero/bool=false
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
     --accept-v/bool=false:
   return compare input-a input-b
+    --accept-version-core-zero=accept-version-core-zero
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -64,11 +66,13 @@ Compares two semantic version strings.
 Overload allowing custom action block for `--if-equal`.
 */
 compare input-a/string input-b/string [--if-equal] -> int
+    --accept-version-core-zero/bool=false
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
     --accept-v/bool=false:
   return compare input-a input-b
+    --accept-version-core-zero=accept-version-core-zero
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -84,6 +88,7 @@ Calls the given $if-equal block if $input-a and $input-b compare as equal.
 Calls $if-error if either input can't be parsed.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error] -> int
+    --accept-version-core-zero/bool=false
     --accept-missing-minor/bool=false
     --accept-missing-patch/bool=false
     --accept-leading-zeros/bool=false
@@ -91,6 +96,7 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
 
   // Normalize both sides to SemanticVersion
   a := SemanticVersion.parse input-a
+    --accept-version-core-zero=accept-version-core-zero
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -98,6 +104,7 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --if-error=: return if-error.call it
 
   b := SemanticVersion.parse input-b
+    --accept-version-core-zero=accept-version-core-zero
     --accept-missing-minor=accept-missing-minor
     --accept-missing-patch=accept-missing-patch
     --accept-leading-zeros=accept-leading-zeros
@@ -115,6 +122,7 @@ class SemanticVersion:
 
   // Accepts --if-error block
   static parse input/string  -> SemanticVersion
+      --accept-version-core-zero/bool=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
       --accept-leading-zeros/bool=false
@@ -122,6 +130,7 @@ class SemanticVersion:
       [--if-error]:
 
     parsed := (SemanticVersionTXTParser_ input
+      --accept-version-core-zero=accept-version-core-zero
       --accept-missing-minor=accept-missing-minor
       --accept-missing-patch=accept-missing-patch
       --accept-leading-zeros=accept-leading-zeros
@@ -131,12 +140,14 @@ class SemanticVersion:
     return parsed
 
   static parse input/string -> SemanticVersion
+      --accept-version-core-zero/bool=false
       --accept-missing-minor/bool=false
       --accept-missing-patch/bool=false
       --accept-leading-zeros/bool=false
       --accept-v/bool=false:
 
     parsed := (SemanticVersionTXTParser_ input
+      --accept-version-core-zero=accept-version-core-zero
       --accept-missing-minor=accept-missing-minor
       --accept-missing-patch=accept-missing-patch
       --accept-leading-zeros=accept-leading-zeros
@@ -306,12 +317,14 @@ class SemanticVersion:
 
 class SemanticVersionTXTParser_:
   source/string := ?
+  accept-version-core-zero/bool
   accept-missing-minor/bool
   accept-missing-patch/bool
   accept-leading-zeros/bool
   accept-v/bool
 
   constructor .source/string
+      --.accept-version-core-zero/bool=false
       --.accept-missing-minor/bool=false
       --.accept-missing-patch/bool=false
       --.accept-leading-zeros=false
@@ -355,7 +368,7 @@ class SemanticVersionTXTParser_:
       pre-releases-list = pre-releases-string.split "."
       builder = builder[..minus-index]
 
-    // Split version numbers.
+    // Split version numbers.  Check for non zero.
     version-core-list = builder.split "."
 
     // Check list length and fix.
@@ -382,6 +395,11 @@ class SemanticVersionTXTParser_:
     version-core-list.do:
       digits := it
       version-core-ints.add (int.parse digits --if-error=: throw "Version number '$(digits)' not an integer")
+
+    // Check all of version-core are non-zero.
+    if not accept-version-core-zero:
+      if not (version-core-ints.any: it > 0):
+        throw "Version-core are all zero."
 
     return SemanticVersion
       version-core-ints[0]

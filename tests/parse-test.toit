@@ -148,18 +148,7 @@ test label/string tests/List --visual=false:
     result := ""
     a := entry[0]
     expected := entry[1]
-    actual := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --if-error=(: null))
-    parsed :=  actual != null
+    actual := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --accept-version-core-zero --if-error=(: null))
 
-    if parsed == expected:
-      result += " - PASS:      "
-    else:
-      result += " - FAILED: ** "
-      exit-code = 1
-
-    if parsed:
-      result += "[$a] parsed successfully as [$actual]"
-    else:
-      result += "[$a] FAILED parsing. "
-
-    print result
+    print "- testing: $a (expecting: $expected)"
+    expect-equals expected actual

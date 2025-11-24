@@ -188,7 +188,7 @@ otherwise potentially cause code to crash/stop):
 | `.parse "1.2" --accept-missing-patch` | Will parse as `1.2.0`. |
 | `.parse "1.2.03" --accept-leading-zeros` | This, and other variations like `1.02.3`, `001.002.003` will all parse as `1.2.3`.  Also accepts leading zeros on numeric `--pre-releases`, which normally would not parse. |
 | `.parse "v1.2.3" --accept-v` |  Ignores the preceeding 'v', and parses as `1.2.3`. |
-| `.parse "1.a.3" --if-error=(: null)` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block instead, in this case producing `null` as the result.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces).) |
+| `.parse "1.a.3" [--if-error]` | This, and other variations like `1.2.a` or `a.2.3`,  would normally fail parsing and throw an error. Using this switch will execute the supplied block in case of error.  (Search 'nullable' in this [Toit Documentation](https://docs.toit.io/language/objects-constructors-inheritance-interfaces).) |
 
 #### Example Combinations and Exceptions
 Switches can work in combination, as per the following examples:
