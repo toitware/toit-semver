@@ -165,9 +165,20 @@ class SemanticVersion:
   /**
   Construct SemanticVersion object using supplied arguments.
 
+  Variant accepts $version-core as a List.
+  */
+  constructor --.version-core/List=[0, 0, 0] --.pre-releases/List=[] --.build-metadata/List=[]:
+
+    // Check all of version-core are non-zero.
+    if not (version-core.any: it > 0):
+      throw "Version-core are all zero."
+
+  /**
+  Construct SemanticVersion object using supplied arguments.
+
   Must be provided in this order: major then minor then patch.
   */
-  constructor major/int=0 minor/int=0 patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
+  constructor major/int minor/int=0 patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
     version-core = [major, minor, patch]
 
     // Check all of version-core are non-zero.
@@ -192,30 +203,15 @@ class SemanticVersion:
         --pre-releases = (pre-releases or this.pre-releases)
         --build-metadata = (build-metadata or this.build-metadata)
 
+  /** The major semver version number. */
   major -> int: return version-core[0]
+
+  /** The minor semver version number. */
   minor -> int: return version-core[1]
+
+  /** The semver patch version number. */
   patch -> int: return version-core[2]
 
-  /*
-  operator < other/SemanticVersion -> bool:
-    if compare-lists-less-than_ this.triplet other.triplet: return true
-    if compare-lists-less-than_ this.pre-releases other.pre-releases: return true
-    // Build-metadata should not be compared.
-    return false
-
-  operator > other/SemanticVersion -> bool:
-    return not this <= other
-
-  operator == other/SemanticVersion -> bool:
-    // Build-metadata should not be compared.
-    return (triplet == other.triplet) and (pre-releases == other.pre-releases)
-
-  operator >= other/SemanticVersion -> bool:
-    return not this < other
-
-  operator <= other/SemanticVersion -> bool:
-    return (this < other) or (this == other)
-  */
 
   // Compare two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
