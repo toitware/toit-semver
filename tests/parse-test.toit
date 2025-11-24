@@ -148,18 +148,18 @@ test label/string tests/List --visual=false:
     result := ""
     a := entry[0]
     expected := entry[1]
-    attempt := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --if-error=(: null))
-    parsed :=  attempt is SemanticVersion
+    actual := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --if-error=(: null))
+    parsed :=  actual != null
 
     if parsed == expected:
       result += " - PASS:      "
     else:
       result += " - FAILED: ** "
+      exit-code = 1
 
-    if attempt is SemanticVersion:
+    if parsed:
       result += "[$a] parsed successfully as [$attempt]"
     else:
       result += "[$a] FAILED parsing. "
-      exit-code = 1
 
     print result

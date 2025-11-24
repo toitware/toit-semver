@@ -21,8 +21,8 @@ TESTS ::= [
 
 // From https://github.com/omichelsen/compare-versions/blob/main/test/compare.ts.
 
-// XXXX Single-segment versions are not valid semver, but we support them in comparisons.  XXXX
-// Only supported with the valid switches.
+// Single-segment versions are not valid semver, but are supported in
+// comparisons with the appropriate switches.
 SINGLE-SEGMENT ::= [
   ["10", "9", 1],
   ["10", "10", 0],
@@ -30,8 +30,8 @@ SINGLE-SEGMENT ::= [
 
 ]
 
-// XXXX Double-segment versions are not valid semver, but we support them in comparisons.  XXXX
-// Only supported with the valid switches.
+// Double-segment versions are not valid semver, but we support them in
+// comparisons when used with the appropriate switches.
 TWO-SEGMENT ::= [
   ["10.8", "10.4", 1],
   ["10.1", "10.1", 0],
