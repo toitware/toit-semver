@@ -43,8 +43,8 @@ main:
   expect-not (semver.is-valid "1.0.0+ä")
   expect-not (semver.is-valid "1.0.0-a-z.A-Z.0-9.00")
 
-  expect-not (semver.is-valid "v1.0.0")
   expect (semver.is-valid "v1.0.0" --accept-v)
+  expect-not (semver.is-valid "v1.0.0")
 
   expect (semver.is-valid "1" --accept-missing-minor)
   expect-not (semver.is-valid "1")
