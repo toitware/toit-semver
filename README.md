@@ -37,7 +37,7 @@ reference.
 Examples of what can be seen in practical use:
 - `1.0.0`: First official release — stable interface guaranteed moving forward.
 - `3.0.0-alpha.1`: This would refer to unstable alpha version of v3.0.0. ".1"
-  usually means first alpha of what will become version 3.0.0.
+  usually means the first alpha version of what will become version 3.0.0.
 - `2.1.0-beta+exp.sha.5114f85`: This would denotes a beta build, and gives build
   metadata, likely showing a specific experiment/commit.
 
