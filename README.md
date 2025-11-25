@@ -158,7 +158,7 @@ Comparison operators are shown in the example below.
     print "f and g are different."
 
   // Prints 'null'
-  print semver-h:
+  print semver-h
 ```
 
 #### Simple comparison using strings only
