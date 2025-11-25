@@ -107,7 +107,7 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --accept-leading-zeros/bool=false
     --accept-v/bool=false:
 
-  // Normalize both sides to SemanticVersion
+  // Normalize both sides to SemanticVersion.
   a := SemanticVersion.parse input-a
     --accept-version-core-zero=accept-version-core-zero
     --accept-missing-minor=accept-missing-minor
@@ -182,7 +182,7 @@ class SemanticVersion:
 
 
   /**
-  Construct SemanticVersion object using supplied arguments.
+  Constructs a SemanticVersion from a $version-core.
 
   Variant accepts $version-core as a List.
   */
@@ -193,7 +193,7 @@ class SemanticVersion:
       throw "Version-core are all zero."
 
   /**
-  Construct SemanticVersion object using supplied arguments.
+  Constructs a SemanticVersion object.
 
   Must be provided in this order: major then minor then patch.
   */
