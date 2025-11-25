@@ -136,7 +136,7 @@ class SemanticVersion:
       --accept-v/bool=false
       [--if-error]:
 
-    parsed := (SemanticVersionTXTParser_ input
+    parsed := (SemanticVersionTxtParser_ input
       --accept-version-core-zero=accept-version-core-zero
       --accept-missing-minor=accept-missing-minor
       --accept-missing-patch=accept-missing-patch
@@ -157,7 +157,7 @@ class SemanticVersion:
       --accept-leading-zeros/bool=false
       --accept-v/bool=false:
 
-    parsed := (SemanticVersionTXTParser_ input
+    parsed := (SemanticVersionTxtParser_ input
       --accept-version-core-zero=accept-version-core-zero
       --accept-missing-minor=accept-missing-minor
       --accept-missing-patch=accept-missing-patch
@@ -282,22 +282,21 @@ class SemanticVersion:
   static is-digit_ c/int -> bool: return '0' <= c <= '9'
 
   /**
-  Compare two semantic version objects.
+  Compares this object to another semantic version.
 
   Similar to all `compare-to` functions the `compare` function returns -1 if the
     left-hand side is less than the right-hand side; 0 if they are equal, and 1
     otherwise.
 
-  Variant allows custom action block for `--if-equal`.
   */
   compare-to other/SemanticVersion --compare-build-metadata=false -> int:
     return compare-to other --compare-build-metadata=compare-build-metadata --if-equal=: 0
 
   /**
-  Compare two semantic version objects.
+  Compares this object to another semantic version.
 
-  Similar to all `compare-to` functions the `compare` function returns -1 if the
-    left-hand side is less than the right-hand side; and 1 otherwise.
+  Returns -1 if the left-hand side is less than the right-hand side; 0 if they are equal,
+    and 1 otherwise. The comparison is done using semver semantics. See $compare-to.
 
   Variant allows custom action block for `--if-equal`.
   */
@@ -339,7 +338,7 @@ class SemanticVersion:
 
 
 
-class SemanticVersionTXTParser_:
+class SemanticVersionTxtParser_:
   source/string := ?
   accept-version-core-zero/bool
   accept-missing-minor/bool
