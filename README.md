@@ -64,7 +64,7 @@ such as `>`,  `<=`, etc. The [standard](https://semver.org/) dictates rules
 about these.  Not all are obvious at first.  They operate in the following way:
 | Example | Explanation |
 | - | - |
-| `1.2.3` > `1.2.1` | As expected. |
+| `1.20.3` > `1.9.1` | As expected - numbers are ints, and not a lexical comparison. |
 | `1.2.3` > `1.2.3-beta` | Versions with pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).
 | `1.2.3-beta.01` > `1.2.3-beta` | Pre-release information is a set/array, parsed by `.`.  A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. |
 | `1.2.3-beta.2.1` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
