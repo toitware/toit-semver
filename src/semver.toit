@@ -192,9 +192,6 @@ class SemanticVersion:
 
   /**
   Creates a copy of the object with supplied properties changed.
-
-  Object is normally immutable, but easier with this helper which creates a
-    changed copy.
   */
   with --major/int? = null -> SemanticVersion
        --minor/int? = null
@@ -289,7 +286,7 @@ class SemanticVersion:
 
   Similar to all `compare-to` functions the `compare` function returns -1 if the
     left-hand side is less than the right-hand side; 0 if they are equal, and 1
-    otherwise.  On errors, returns `null`.
+    otherwise.
 
   Variant allows custom action block for `--if-equal`.
   */
@@ -300,8 +297,7 @@ class SemanticVersion:
   Compares two semantic version objects.
 
   Similar to all `compare-to` functions the `compare` function returns -1 if the
-    left-hand side is less than the right-hand side; and 1 otherwise.  On
-    errors, returns `null`.
+    left-hand side is less than the right-hand side; and 1 otherwise.
 
   Variant allows custom action block for `--if-equal`.
   */
