@@ -38,7 +38,7 @@ is-valid input/string -> bool
   return true
 
 /**
-Compares two semantic version strings.
+Compare two semantic version strings.
 
 For convenience and backwards compatibility, it is possible to compare two
   strings directly. In the background the library creates the corresponding
@@ -66,7 +66,7 @@ compare input-a/string input-b/string -> int
     --if-equal=(: 0)
 
 /**
-Compares two semantic version strings.
+Compare two semantic version strings.
 
 Variant allowing custom action block for `--if-equal`.
 */
@@ -282,7 +282,7 @@ class SemanticVersion:
   static is-digit_ c/int -> bool: return '0' <= c <= '9'
 
   /**
-  Compares two semantic version objects.
+  Compare two semantic version objects.
 
   Similar to all `compare-to` functions the `compare` function returns -1 if the
     left-hand side is less than the right-hand side; 0 if they are equal, and 1
@@ -294,7 +294,7 @@ class SemanticVersion:
     return compare-to other --compare-build-metadata=compare-build-metadata --if-equal=: 0
 
   /**
-  Compares two semantic version objects.
+  Compare two semantic version objects.
 
   Similar to all `compare-to` functions the `compare` function returns -1 if the
     left-hand side is less than the right-hand side; and 1 otherwise.
@@ -312,13 +312,16 @@ class SemanticVersion:
 
     if (this.version-core == other.version-core):
       if (this.pre-releases == other.pre-releases):
-        if compare-build-metadata:
-          if (this.build-metadata == other.build-metadata):
-            return if-equal.call
-        else:
+        if (this.build-metadata == other.build-metadata):
           return if-equal.call
+        //if compare-build-metadata:
+        //  if (this.build-metadata == other.build-metadata):
+        //    return if-equal.call
+        //else:
+        //  return if-equal.call
 
     return 1
+
 
   /**
   A string representation of the object.
