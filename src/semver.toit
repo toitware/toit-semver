@@ -2,8 +2,6 @@
 // Use of this source code is governed by an MIT-style license that can be found
 // in the LICENSE file.
 
-import log
-
 /**
 A semantic versioning library.
 
@@ -13,12 +11,17 @@ See https://semver.org/ for details.
 /**
 Determines if a semantic version string is valid against semver 2.0.0.
 
-This function accepts switches as defined in README.md:
-- `--accept-leading-zeros`
-- `--accept-missing-minor`
-- `--accept-missing-patch`
-- `--accept-v`
-- `--accept-version-core-zero`
+This function accepts parameters as defined in README.md:
+- If `$accept-version-core-zero` is true, then 0.0.0 will be accepted for
+the version core.
+- If `$accept-missing-minor` is true, then accepts version numbers without minor
+(and patch), like `1`.
+- If `$accept-missing-patch` is true, then accepts version numbers without
+patch, like `1.2`.
+- If `$accept-v` is true, version numbers are accepted with the preceeding v,
+like `v1.2.1`.
+- If `$accept-leading-zeros` is true, version numbers are accepted that have
+leading zeros in front of them, like `1.02.3`.
 */
 is-valid input/string -> bool
     --accept-version-core-zero/bool=false
@@ -48,7 +51,8 @@ Similar to all `compare-to` functions the `compare` function returns -1 if the
   left-hand side is less than the right-hand side; 0 if they are equal, and 1
   otherwise.  On errors, returns `null`.
 
-Accepts flexibility switches for parsing, like `accept-leading-zeros` etc.
+Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+  explanation of the boolean parameters.
 */
 compare input-a/string input-b/string -> int
     --accept-version-core-zero/bool=false
@@ -68,7 +72,8 @@ compare input-a/string input-b/string -> int
 /**
 Compare two semantic version strings.
 
-Variant allowing custom action block for `--if-equal`.
+Variant allowing custom action block for `--if-equal`. See `$is-valid` for
+  an explanation of the boolean parameters.
 */
 compare input-a/string input-b/string [--if-equal] -> int
     --accept-version-core-zero/bool=false
@@ -91,6 +96,9 @@ Variant of $(compare a b).
 Calls the given $if-equal block if $input-a and $input-b compare as equal.
 
 Calls $if-error if either input can't be parsed.
+
+Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+  explanation of the boolean parameters.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --accept-version-core-zero/bool=false
@@ -127,6 +135,9 @@ class SemanticVersion:
   Parses the supplied string into a SemanticVersion object.
 
   Calls the supplied $if-error block if input can't be parsed.
+
+  Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+    explanation of the boolean parameters.
   */
   static parse input/string  -> SemanticVersion?
       --accept-version-core-zero/bool=false
@@ -149,6 +160,9 @@ class SemanticVersion:
   Parses the supplied string into a SemanticVersion object.
 
   Variant will throw if input can't be parsed.
+
+  Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+    explanation of the boolean parameters.
   */
   static parse input/string -> SemanticVersion
       --accept-version-core-zero/bool=false
