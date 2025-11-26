@@ -347,7 +347,7 @@ class SemanticVersion:
     return (compare-to other --compare-build-metadata=true) == 0
 
   precedes other/SemanticVersion -> bool:
-    return (compare-to other) > 0
+    return (compare-to other) < 0
 
   /**
   A string representation of the object.
