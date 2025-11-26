@@ -83,6 +83,7 @@ main:
 
   expect-equals 1 (semver.compare "1.0.0-alpha.1" "1.0.0-alpha" --accept-missing-minor --accept-missing-patch)
 
+  expect-equals -1 (semver.compare "1.0.0-alpha.1" "1.0.0+alpha.1")
   expect-equals -1 (semver.compare "1.0.0-alpha" "1.0.0-alpha.1")
   expect-equals -1 (semver.compare "1.0.0-alpha.1" "1.0.0-alpha.beta")
   expect-equals -1 (semver.compare "1.0.0-alpha.beta" "1.0.0-beta")
