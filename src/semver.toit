@@ -69,6 +69,21 @@ compare input-a/string input-b/string -> int
     --if-error=(: throw it)
     --if-equal=(: 0)
 
+compare input-a/string input-b/string  [--if-error] -> int
+    --accept-version-core-zero/bool=false
+    --accept-missing-minor/bool=false
+    --accept-missing-patch/bool=false
+    --accept-leading-zeros/bool=false
+    --accept-v/bool=false:
+  return compare input-a input-b
+    --accept-version-core-zero=accept-version-core-zero
+    --accept-missing-minor=accept-missing-minor
+    --accept-missing-patch=accept-missing-patch
+    --accept-leading-zeros=accept-leading-zeros
+    --accept-v=accept-v
+    --if-error=if-error
+    --if-equal=(: 0)
+
 /**
 Compare two semantic version strings.
 
@@ -186,23 +201,34 @@ class SemanticVersion:
 
   Variant accepts $version-core as a List.
   */
-  constructor --.version-core/List=[0, 0, 0] --.pre-releases/List=[] --.build-metadata/List=[]:
+  constructor --.version-core/List=[0, 0, 0]
+      --.pre-releases/List=[]
+      --.build-metadata/List=[]
+      --accept-version-core-zero/bool=false:
 
     // Check all of version-core are non-zero.
-    if not (version-core.any: it > 0):
+    if accept-version-core-zero and not (version-core.any: it > 0):
       throw "Version-core are all zero."
+
+  // Constructor with no checks, for use with parser.
+  constructor.private_ --.version-core/List=[0, 0, 0]
+      --.pre-releases/List=[]
+      --.build-metadata/List=[]:
 
   /**
   Constructs a SemanticVersion object.
 
   Must be provided in this order: major then minor then patch.
   */
-  constructor major/int minor/int=0 patch/int=0 --.pre-releases/List=[] --.build-metadata/List=[]:
+  constructor major/int minor/int=0 patch/int=0
+      --.pre-releases/List=[]
+      --.build-metadata/List=[]
+      --accept-version-core-zero/bool=false:
     version-core = [major, minor, patch]
 
     // Check all of version-core are non-zero.
-    if not (version-core.any: it > 0):
-      throw "Version-core are all zero."
+    if accept-version-core-zero and not (version-core.any: it > 0):
+      throw "Version-core are all zero. (Constructor.)"
 
   /**
   Creates a copy of the object with supplied properties changed.
@@ -231,49 +257,114 @@ class SemanticVersion:
 
   // Compare two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
-  static compare-lists-less-than_ l1/List l2/List -> bool:
-    if (l2.size == 0) and (l1.size == 0): return false
-    if l2.size == 0: return true   // l1.size must be > 0 from earlier.
-    if l1.size == 0: return false  // l2.size must be > 0 from earlier.
+  //
+  // todo: test removing the comparisons at the top.
+  static compare-lists_ l1/List l2/List -> int:
+    // If both are empty, then they are the same. (or should we throw?)
+    if (l2.size == 0) and (l1.size == 0): return 0
+
+    // Considering version-core is guarded from being empty in the constructor
+    // then we treat empty lists as if they were pre-releases, and then per
+    // semver rules.  eg, If there is a prerelease list on one and not the
+    // other, then the one without a pre-release list is greater.
+    if l2.size == 0: return -1   // (l1.size must be > 0 from earlier).
+    if l1.size == 0: return 1  // (l2.size must be > 0 from earlier).
 
     l1.size.repeat: | i/int |
       // No matching cell in L2 to compare with L1.
-      if l2.size < (i + 1) : return false
+      if l2.size < (i + 1) : return 1
 
       // One string and one int:  Numeric always less than a string.
       l1-numeric := (is-numeric_ l1[i])
       l2-numeric := (is-numeric_ l2[i])
-      if l1-numeric and not l2-numeric: return true
-      if l2-numeric and not l1-numeric: return false
+      if l1-numeric and not l2-numeric: return -1
+      if l2-numeric and not l1-numeric: return 1
 
       // Both are lexical: use Toit compare-to.
       if (not l1-numeric) and (not l2-numeric):
         str-compare := (l1[i].compare-to l2[i])
-        if str-compare == -1: return true
-        else if str-compare == 1: return false
+        if str-compare != 0: return str-compare
         // Must be == at this point, continue to next loop.
 
       // Both must be numeric: force string to int and compare.
       if l1-numeric and l2-numeric:
         l1-int := force-int_ l1[i]
         l2-int := force-int_ l2[i]
-        if l1-int < l2-int: return true
-        if l1-int > l2-int: return false
+        if l1-int < l2-int: return -1
+        if l1-int > l2-int: return 1
 
       // Must be l1[it] == l2[it] continue to next loop.
 
     // At this point, we've got to the end of L1, there may be more L2 left.
     // Therefore at L1 is < L2, and therefore this must be true.
-    if l1.size < l2.size: return true
+    if l1.size < l2.size: return -1
 
     // Any other case:
-    return false
+    //print "We got to the very end. aren't they equal?"
+    return 0
+
+  /**
+  Compares this object to another semantic version.
+
+  Returns -1 if the left-hand side is less than the right-hand side; 0 if they are equal,
+    and 1 otherwise. The comparison is done using semver semantics. See $compare-to.
+
+  Variant allows custom action block for `--if-equal`.
+  */
+  compare-to other/SemanticVersion --compare-build-metadata=false [--if-equal] -> int:
+    //print "- comparing $(this.stringify) and $(other.stringify)"
+
+    version-core-compare := compare-lists_ this.version-core other.version-core
+    //print "- - comparing $(this.version-core) and $(other.version-core) == $version-core-compare"
+    if version-core-compare != 0:
+      return version-core-compare
+
+    pre-releases-compare := compare-lists_ this.pre-releases other.pre-releases
+    //print "- - comparing $(this.pre-releases) and $(other.pre-releases) == $pre-releases-compare"
+    if pre-releases-compare != 0:
+      return pre-releases-compare
+
+    if compare-build-metadata:
+      build-metadata-compare := compare-lists_ this.build-metadata other.build-metadata
+      //print "- - comparing $(this.build-metadata) and $(other.build-metadata) == $build-metadata-compare"
+      if build-metadata-compare != 0:
+        return build-metadata-compare
+
+    return if-equal.call
+
+  /**
+  Compares this object to another semantic version.
+
+  Similar to all `compare-to` functions the `compare` function returns -1 if the
+    left-hand side is less than the right-hand side; 0 if they are equal, and 1
+    otherwise.
+
+  */
+  compare-to other/SemanticVersion --compare-build-metadata=false -> int:
+    return compare-to other --compare-build-metadata=compare-build-metadata --if-equal=: 0
+
+  equals other/SemanticVersion -> bool:
+    return (compare-to other --compare-build-metadata=true) == 0
+
+  precedes other/SemanticVersion -> bool:
+    return (compare-to other) > 0
+
+  /**
+  A string representation of the object.
+  */
+  stringify -> string:
+    str := "$major.$minor.$patch"
+    if not pre-releases.is-empty:
+      str += "-$(pre-releases.join ".")"
+    if not build-metadata.is-empty:
+      str += "+$(build-metadata.join ".")"
+    return str
 
   // Force integer stored in a string to be an int.  (Safe if already an int.)
   static force-int_ input/any -> int:
     input-int/int := ?
     if input is string:
-      input-int = int.parse input
+      input-int = int.parse input --if-error=(: throw it)
     else if input is int:
       input-int = input
     else:
@@ -294,58 +385,6 @@ class SemanticVersion:
 
   // Check if a character is a digit.
   static is-digit_ c/int -> bool: return '0' <= c <= '9'
-
-  /**
-  Compares this object to another semantic version.
-
-  Similar to all `compare-to` functions the `compare` function returns -1 if the
-    left-hand side is less than the right-hand side; 0 if they are equal, and 1
-    otherwise.
-
-  */
-  compare-to other/SemanticVersion --compare-build-metadata=false -> int:
-    return compare-to other --compare-build-metadata=compare-build-metadata --if-equal=: 0
-
-  /**
-  Compares this object to another semantic version.
-
-  Returns -1 if the left-hand side is less than the right-hand side; 0 if they are equal,
-    and 1 otherwise. The comparison is done using semver semantics. See $compare-to.
-
-  Variant allows custom action block for `--if-equal`.
-  */
-  compare-to other/SemanticVersion --compare-build-metadata=false [--if-equal] -> int:
-    if compare-lists-less-than_ this.version-core other.version-core:
-      if compare-lists-less-than_ this.pre-releases other.pre-releases:
-        if compare-build-metadata:
-          if compare-lists-less-than_ this.build-metadata other.build-metadata:
-            return -1
-        else:
-          return -1
-
-    if (this.version-core == other.version-core):
-      if (this.pre-releases == other.pre-releases):
-        if (this.build-metadata == other.build-metadata):
-          return if-equal.call
-        //if compare-build-metadata:
-        //  if (this.build-metadata == other.build-metadata):
-        //    return if-equal.call
-        //else:
-        //  return if-equal.call
-
-    return 1
-
-
-  /**
-  A string representation of the object.
-  */
-  stringify -> string:
-    str := "$major.$minor.$patch"
-    if not pre-releases.is-empty:
-      str += "-$(pre-releases.join ".")"
-    if not build-metadata.is-empty:
-      str += "+$(build-metadata.join ".")"
-    return str
 
   hash-code:
     return major + 1000 * minor + 1000000 * patch
@@ -434,18 +473,17 @@ class SemanticVersionTxtParser_:
       if not (version-core-ints.any: it > 0):
         throw "Version-core are all zero."
 
-    return SemanticVersion
-      version-core-ints[0]
-      version-core-ints[1]
-      version-core-ints[2]
+    // All checks and exceptions made, therefore use private constructor.
+    return SemanticVersion.private_
+      --version-core=version-core-ints
       --pre-releases=pre-releases-list
       --build-metadata=build-metadata-list
 
-  semantic-version --consume-all/bool=false [--if-error] -> SemanticVersion?:
-    //return semantic-version --consume-all=consume-all
+  semantic-version [--if-error] -> SemanticVersion?:
+    //return semantic-version
     exception := catch :
       // Delegate to the throwing overload so the real work lives in ONE place.
-      return semantic-version --consume-all=consume-all
+      return semantic-version
 
     if exception:
       return if-error.call exception

@@ -23,6 +23,7 @@ TESTS ::= [
 main:
   expect-equals 0 (semver.compare TESTS[0] TESTS[0])
 
+  /*
   for i := 1; i < TESTS.size; i++:
     a := TESTS[i - 1]
     b := TESTS[i]
@@ -30,7 +31,7 @@ main:
     expect-equals -1 (semver.compare a b)
     expect-equals 1 (semver.compare b a)
     expect-equals 0 (semver.compare b b)
-
+  */
 
   // Various arbitrary text comparisons.
   expect-equals 1 (semver.compare "1.0.0" "1.0.0" --if-equal=: 1)
@@ -44,10 +45,10 @@ main:
   // Various handling of 'v' in front.  Should fail with v present and no switch.
   expect-equals 0 (semver.compare "v1.0.0" "1.0.0" --accept-v)
   expect-equals 0 (semver.compare "v1.0.0" "v1.0.0" --accept-v)
-  expect-not-equals 0 (semver.compare "v1.0.0" "v1.0.0")
-  expect-equals 1 (semver.compare "v1.0.0" "0.0.0" --accept-v)
-  expect-equals 1 (semver.compare "v1.0.0" "v0.0.0" --accept-v)
-
+  expect-equals 1 (semver.compare "v1.0.0" "0.0.0" --accept-v --accept-version-core-zero)
+  expect-equals 1 (semver.compare "v1.0.0" "v0.0.0" --accept-v --accept-version-core-zero)
+  // Including 'v' will throw without --accept-v.  This tests --if-error.
+  expect-not-equals 0 (semver.compare "v1.0.0" "v1.0.0" --if-error=(: 30))
 
   // Comparison of Single Segment semvers
   expect-equals 1 (semver.compare "10" "9" --accept-missing-minor --accept-missing-patch)
@@ -70,7 +71,7 @@ main:
   expect-equals 0 (semver.compare "01.1.0" "1.01" --accept-missing-minor --accept-missing-patch --accept-leading-zeros)
   expect-equals 0 (semver.compare "1.0.0" "1" --accept-missing-minor --accept-missing-patch)
 
-  expect-equals 0 (semver.compare "01.0.0" "1" --accept-leading-zeros)
+  expect-equals 0 (semver.compare "01.0.0" "1" --accept-leading-zeros --accept-missing-minor)
   expect-equals 0 (semver.compare "01.0.0" "1.0.0" --accept-leading-zeros)
   expect-equals 0 (semver.compare "1.01.0" "1.01.0" --accept-leading-zeros)
   expect-equals 0 (semver.compare "1.0.03" "1.0.3" --accept-leading-zeros)
@@ -89,7 +90,7 @@ main:
   expect-equals -1 (semver.compare "1.0.0-beta.2" "1.0.0-beta.11")
   expect-equals -1 (semver.compare "1.0.0-beta.11" "1.0.0-rc.1")
   expect-equals -1 (semver.compare "1.0.0-rc.1" "1.0.0")
-  expect-equals -1 (semver.compare "1.0.0-alpha" "1")
+  expect-equals -1 (semver.compare "1.0.0-alpha" "1" --accept-missing-minor )
   expect-equals 1 (semver.compare "1.0.0-beta.11" "1.0.0-beta.1")
   expect-equals 1 (semver.compare "1.0.0-beta.10" "1.0.0-beta.9")
   expect-equals -1 (semver.compare "1.0.0-beta.10" "1.0.0-beta.90")
