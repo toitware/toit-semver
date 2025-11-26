@@ -67,8 +67,8 @@ main:
   expect-equals -1 (semver.compare "11.0.2" "11.0.10")
 
   expect-equals 1 (semver.compare "11.1.10" "11.0" --accept-missing-patch)
-  expect-equals 1 (semver.compare "1.1.1" "1" --accept-missing-minor --accept-missing-patch)
-  expect-equals 0 (semver.compare "01.1.0" "1.01" --accept-missing-minor --accept-missing-patch --accept-leading-zeros)
+  expect-equals 1 (semver.compare "1.1.1" "1" --accept-missing-minor)
+  expect-equals 0 (semver.compare "01.1.0" "1.01" --accept-missing-patch --accept-leading-zeros)
   expect-equals 0 (semver.compare "1.0.0" "1" --accept-missing-minor --accept-missing-patch)
 
   expect-equals 0 (semver.compare "01.0.0" "1" --accept-leading-zeros --accept-missing-minor)
