@@ -66,23 +66,20 @@ only two operators - `precedes` and `equals`, which work in the following way:
 
 | Logical Comparison | How in this package | Notes |
 | - | - | - |
-| `a == b` | `a.equals b` |
+| `a == b` | `a.equals b` | Whilst Semver requires `build-metadata` to be ignored when performing comparisons, this code will see versions with different metadata as different. |
 | `a < b`  | `a.precedes b` |
 | `a <= b` | `not b.precedes a` |
 | `a > b`  | `b.precedes a` |
 | `a >= b` | `not a.precedes b` |
 
 
-### Examples
+### Practical Examples
 !!! To finish off!!!
 
-
-such as `>`,  `<=`, etc. The [standard](https://semver.org/) dictates rules
-about these.  Not all are obvious at first.  They operate in the following way:
-| Example | Explanation |
-| - | - |
-| `(1.20.3).precedes "1.9.1"` | `true`. As expected - numbers are ints, and not a lexical comparison. |
-| `1.2.3` > `1.2.3-beta` | Versions with pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).
+| Example Pesudocode | Result | Explanation |
+| - | - | - |
+| `"1.20.3" .precedes "1.9.1"` | `true` | As expected. Numbers are integers, and therefore not a lexical comparison. |
+| `"1.2.3" .precedes "1.2.3-beta"` | `true` | Versions with pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).
 | `1.2.3-beta.01` > `1.2.3-beta` | Pre-release information is a set/array, parsed by `.`.  A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. |
 | `1.2.3-beta.2.1` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
 | `1.2.3-beta.2` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
