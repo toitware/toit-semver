@@ -33,7 +33,7 @@ main:
   semver-e-new := semver-e.with --minor=15
 
   // Prints '1.15.3-alpha.1'.
-  expect-equals "'1.15.3-alpha.1" "$semver-e-new"
+  expect-equals "1.15.3-alpha.1" "$semver-e-new"
 
   // strings
   string-f := "1.0.0"
@@ -48,16 +48,31 @@ main:
 
   // prints "3.10.1-beta.1".
   // (Note that the v was dropped during parsing.)
-  print "3.10.1-beta.1" semver-g
+  expect-equals "3.10.1-beta.1" "$semver-g"
 
-  h := "1.0.0"
-  i := "1.0.0-beta.1"
+  // Parse the strings into SemanticVersion objects.
+  semver-h := SemanticVersion 1 20 3
+  semver-i := SemanticVersion 2 5 10
 
-  // Compare two strings.
-  expect-equals 1 (compare h i)
+  // Compare two objects: prints "1.20.3 precedes 2.5.10."
+  expect-equals -1 (semver-h.compare-to semver-i)
 
-  // Compare same strings.
-  print "Compare is: $(compare i i)"
+  // Compare two objects: prints "true"
+  expect (semver-h.precedes semver-i)
 
-  // Compare two strings.
-  expect-equals -1 (compare i h)
+  // Compare two objects: prints "1.20.3 and 2.5.10 are different."
+  expect-not (semver-h.equals semver-i)
+
+
+  // Create strings
+  v1 := "1.0.0"
+  v1-beta := "1.0.0-beta.1"
+
+  // Compare the two strings. Prints "Compare is: 1".
+  expect-equals 1 (compare v1 v1-beta)
+
+  // Compare two strings: prints "Compare is: -1"
+  expect-equals -1 (compare v1-beta v1)
+
+  // Compare two strings: prints "Compare is: 0"
+  expect-equals 0 (compare v1 v1)

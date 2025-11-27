@@ -168,20 +168,17 @@ otherwise.  `precedes` and `equals` produce boolean results.
   semver-h := SemanticVersion 1 20 3
   semver-i := SemanticVersion 2 5 10
 
-  // Compare two objects: prints "-1"
-  print "$(semver-h.precedes semver-i)"
+  // Compare two objects with output: prints "1.20.3 compare-to 2.5.10 is -1."
+  print "$semver-h compare-to $semver-i is $((semver-h.compare-to semver-i))."
 
-  // Compare two objects: prints "1.20.3 precedes 2.5.10."
-  if (semver-h.precedes semver-i) == -1:
-    print "$h precedes $i."
-  else:
-    print "$i precedes $h."
+  // Compare two objects: prints "true"
+  print "$(semver-h.precedes semver-i)"
 
   // Compare two objects: prints "1.20.3 and 2.5.10 are different."
   if semver-h.equals semver-i:
-    print "$h and $i are the same."
+    print "$semver-h and $semver-i are the same."
   else:
-    print "$h and $i are different."
+    print "$semver-h and $semver-i are different."
 ```
 
 #### Simple comparison using strings only
@@ -204,7 +201,6 @@ otherwise.
 
   // Compare two strings: prints "Compare is: 0"
   print "Compare is: $(compare v1 v1)"
-
 ```
 
 ## Modifying parsing rules
