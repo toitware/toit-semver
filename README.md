@@ -78,14 +78,14 @@ The following examples show these principles in practice:
 
 | Example Pesudocode | Result | Explanation |
 | - | - | - |
-| `"1.20.3" .precedes "1.9.1"` | `false` | As expected. Numbers are integers, and therefore not a lexical comparison. |
-| `"1.2.3" .precedes "1.2.3-beta"` | `true` | Versions with pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).
-| `1.2.3-beta.01` > `1.2.3-beta` | Pre-release information is a set/array, parsed by `.`.  A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. |
-| `1.2.3-beta.2.1` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
-| `1.2.3-beta.2` > `1.2.3-beta.1` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
-| `1.2.3-beta` > `1.2.3-1` | Where strings and integers must be compared, strings have a higher precedence than integers. |
-| `1.2.3-beta+abcd` = `1.2.3-beta` | Build-metadata is not used when comparing. |
-| `1.2.3-beta+sha.0beef` = `1.2.3-beta+sha.80081` | Build-metadata is not used when comparing. |
+| `"1.20.3" precedes "1.9.1"` | `false` | As expected. (Note that fields with all digits are integers, and not compared lexically. |
+| `"1.2.3" precedes "1.2.3-beta"` | `true` | Versions with pre-release information have a lower precedence than the same without pre-release information. [link](https://semver.org/#spec-item-9).
+| `"1.2.3-beta.01" precedes "1.2.3-beta"` | `false` | Pre-release information is a set/array, parsed by `.`.  A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. |
+| `"1.2.3-beta.2.1" precedes "1.2.3-beta.1"` | `false` | If all of the preceding identifiers are equal, integers will be compared the normal way. |
+| `"1.2.3-beta.2" precedes "1.2.3-beta.1"` | `false` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
+| `"1.2.3-1" precedes "1.2.3-beta"` | `true` | Where strings and integers must be compared, strings have a higher precedence than integers. |
+| `"1.2.3-beta+abcd" equals "1.2.3-beta+ef01"` | `false` | Whilst build-metadata should not used when comparing, the build-metadata numbers differ, and therefore are not the same. |
+| `"1.2.3-beta+sha.0beef" precedes "1.2.3-beta+sha.80081"` | `false` | Build-metadata is not used when comparing. |
 
 ## Library Usage
 #### Creating the object directly
@@ -145,26 +145,43 @@ rules](#modifying-parsing-rules).
 Comparison operators are shown in the example below.
 ```toit
   string-f := "1.0.0"
-  string-g := "1.0.0-beta.1"
+  string-g := "v3.10.1-beta.1"
 
   // Parse the strings into SemanticVersion objects.
   semver-f := SemanticVersion.parse string-f
-  semver-g := SemanticVersion.parse string-g
+  semver-g := SemanticVersion.parse string-g --accept-v
 
-  // Compare two objects: prints "f is later than g."
-  if semver-f > semver-g:
-    print "f is later than g."
+  // prints "1.0.0".
+  print semver-f
+
+  // prints "3.10.1-beta.1".
+  // (Note that the v was dropped during parsing.)
+  print string-g
+```
+
+#### Simple comparison
+Similar to all `compare-to` functions the `compare` function returns -1 if the
+left-hand side is less than the right-hand side; 0 if they are equal, and 1
+otherwise.  `precedes` and `equals` produce boolean results.
+```toit
+  // Parse the strings into SemanticVersion objects.
+  semver-h := SemanticVersion 1 20 3
+  semver-i := SemanticVersion 2 5 10
+
+  // Compare two objects: prints "-1"
+  print "$(semver-h.precedes semver-i)"
+
+  // Compare two objects: prints "1.20.3 precedes 2.5.10."
+  if (semver-h.precedes semver-i) == -1:
+    print "$h precedes $i."
   else:
-    print "g is later than f."
+    print "$i precedes $h."
 
-  // Compare two objects: prints "f and g are different."
-  if semver-f == semver-g:
-    print "f and g are the same."
+  // Compare two objects: prints "1.20.3 and 2.5.10 are different."
+  if semver-h.equals semver-i:
+    print "$h and $i are the same."
   else:
-    print "f and g are different."
-
-  // Prints 'null'
-  print semver-h
+    print "$h and $i are different."
 ```
 
 #### Simple comparison using strings only
@@ -172,7 +189,7 @@ For convenience and backwards compatibility, it is also possible to compare
 strings directly without creating the objects.
 
 Similar to all `compare-to` functions the `compare` function returns -1 if the
-left-hand side is less than the right-hand side; 0 if they are equal, and 1
+left-hand precedes the right-hand side; 0 if they are equal, and 1
 otherwise.
 ```toit
   // Create strings
@@ -207,7 +224,7 @@ otherwise potentially cause code to crash/stop):
 Arguments can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
-| `.parse "1" --accept-missing-patch` | Throws.  Only excuses missing `patch`, but still expects `minor`. |
+| `.parse "1" --accept-missing-patch` | Throws.  Paramters excuse the missing `patch`, therefore `minor` is still expected. |
 | `.parse "1" --accept-missing-patch --if-error=(: null)` | Invokes the `if-error` block since a `minor` is missing, thus returning `null`. |
 | `.parse 1.54` | In this case 1.2 is a `float`. Floats are not accepted for parsing due to ambiguities about how the decimal parts would be handled. |
 | `.parse "v1.2.3" --if-error=(: null)` | Will return `null`.  The presence of `V` would normally throw without `--accept-v`. |
