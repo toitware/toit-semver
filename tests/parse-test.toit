@@ -112,7 +112,8 @@ MANGLED ::= [
   ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS], // More than one pre-release.
   ["1.4.0-build.3928-build.3928+sha.3928+sha.a8d9d4f", FAIL],   // More than one build-metadata.
   ["1.4.0-build.3928-bu.3-bu.sdsd+s928+sa.4f", FAIL],           // More than one of both.
-  ["1.4.0-build.3928-bu.3+s928-bu.sdsd+sa.4f", FAIL],           // Alternating.
+  ["1.4.0-build.3928-bu.3+s928-bu.sdsd+sa.4f", FAIL],           // Alternating - pre-release first.
+  ["1.4.0-build.3928+s928-bu.sdsd-bu.3+sa.4f", FAIL],           // Alternating - build-metadata first.
   ["1.4.0++sha.a8d9d4f", FAIL], // Two delimiter characters together.
   ["1.4.0--sha.a8d9d4f", PASS], // Two delimiter characters together.
   ["1.0.ab", FAIL],      // Letters where numbers should be.
