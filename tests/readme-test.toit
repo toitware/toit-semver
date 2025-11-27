@@ -29,33 +29,26 @@ main:
   // Prints 2
   expect-equals 2 semver-e.minor
 
+  // Create semver-e-new with minor now = 15
+  semver-e-new := semver-e.with --minor=15
+
+  // Prints '1.15.3-alpha.1'.
+  expect-equals "'1.15.3-alpha.1" "$semver-e-new"
+
   // strings
   string-f := "1.0.0"
-  string-g := "1.0.0-beta.1"
+  string-g := "v3.10.1-beta.1"
 
-/*
-  // parse strings into SemanticVersion objects
+  // Parse the strings into SemanticVersion objects.
   semver-f := SemanticVersion.parse string-f
-  semver-g := SemanticVersion.parse string-g
+  semver-g := SemanticVersion.parse string-g --accept-v
 
-  // compare two objects: prints "f is later than g."
-  if semver-f > semver-g:
-    print "f is later than g."
-  else:
-    print "g is later than f."
+  // prints "1.0.0".
+  expect-equals "1.0.0" "$semver-f"
 
-  // compare two objects: prints "f and g are different."
-  if semver-f == semver-g:
-    print "f and g are the same."
-  else:
-    print "f and g are different."
-
-  // compare two objects: prints "f and f are the same."
-  if semver-f == semver-f:
-    print "f and f are the same."
-  else:
-    print "f and f are different."
-*/
+  // prints "3.10.1-beta.1".
+  // (Note that the v was dropped during parsing.)
+  print "3.10.1-beta.1" semver-g
 
   h := "1.0.0"
   i := "1.0.0-beta.1"

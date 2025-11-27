@@ -206,6 +206,10 @@ class SemanticVersion:
       --.build-metadata/List=[]
       --accept-version-core-zero/bool=false:
 
+    // Check all of version-core are ints.
+    if (version-core.any: not it is int):
+      throw "Version-core contains non-numeric."
+
     // Check all of version-core are non-zero.
     if accept-version-core-zero and not (version-core.any: it > 0):
       throw "Version-core are all zero."
@@ -406,12 +410,12 @@ class SemanticVersionTxtParser_:
       --.accept-leading-zeros=false
       --.accept-v=false:
 
-  semantic-version --consume-all/bool=false -> SemanticVersion?:
+  semantic-version [--if-error] -> SemanticVersion?:
     builder := source
     if builder.starts-with "v" or builder.starts-with "V":
       builder = source[1..]
       if not accept-v:
-        throw "'v' prefixed"
+        return if-error.call "Illegal 'v' prefixed."
 
     version-core-list := []
     pre-releases-list := []
@@ -422,10 +426,10 @@ class SemanticVersionTxtParser_:
     if plus-index != -1:
       build-metadata-string := builder[plus-index + 1..]
       if build-metadata-string.size < 1:
-        throw "'+' supplied, but no build-metadata string afterward."
+        return if-error.call "'+' supplied, but no string follows."
 
       if not is-valid-build-metadata_ build-metadata-string:
-        throw "Build-metadata string '$build-metadata-string' invalid."
+        return if-error.call "Build-metadata string '$build-metadata-string' invalid."
       build-metadata-list = build-metadata-string.split "."
       builder = builder[..plus-index]
 
@@ -434,9 +438,9 @@ class SemanticVersionTxtParser_:
     if minus-index != -1:
       pre-releases-string := builder[minus-index + 1..]
       if pre-releases-string.size < 1:
-        throw "'-' supplied, but no pre-release string afterward."
+        return if-error.call "'-' supplied, but no string follows."
       if not is-valid-prerelease_ pre-releases-string:
-        throw "Invalid pre-release string '$pre-releases-string'."
+        return if-error.call "Invalid pre-release string '$pre-releases-string'."
       pre-releases-list = pre-releases-string.split "."
       builder = builder[..minus-index]
 
@@ -445,49 +449,46 @@ class SemanticVersionTxtParser_:
 
     // Check list length and fix.
     if version-core-list.size > 3:
-      throw "Too many parts in version-core."
+      return if-error.call "Too many parts in version-core."
 
     minor-added := false
     if (version-core-list.size == 1):
-      if not accept-missing-minor: throw "Missing minor."
+      if not accept-missing-minor:
+        return if-error.call "Missing minor."
       version-core-list.add "0"
       minor-added = true
 
     if (version-core-list.size == 2):
-      if not accept-missing-patch and not minor-added: throw "Missing patch."
+      if not accept-missing-patch and not minor-added:
+        return if-error.call "Missing patch."
       version-core-list.add "0"
 
     // Now there are three.  Check each for $accept-leading-zeros
     version-core-list.do:
       if (it.size > 1) and (it[0] == "0") and (not accept-leading-zeros):
-        throw "Leading zeros in version-core part '$it'."
+        return if-error.call "Leading zeros in version-core part '$it'."
 
     // Convert to ints.
     version-core-ints := []
     version-core-list.do:
       digits := it
-      version-core-ints.add (int.parse digits --if-error=: throw "Version number '$(digits)' not an integer")
+      version-core-ints.add (int.parse digits
+        --if-error=: return if-error.call "Version number '$(digits)' not an integer.")
 
     // Check all of version-core are non-zero.
     if not accept-version-core-zero:
       if not (version-core-ints.any: it > 0):
-        throw "Version-core are all zero."
+        return if-error.call "Version-core are all zero."
 
-    // All checks and exceptions made, therefore use private constructor.
+    // All checks and exceptions already evaluated - therefore use private
+    // constructor without all the same checks.
     return SemanticVersion.private_
       --version-core=version-core-ints
       --pre-releases=pre-releases-list
       --build-metadata=build-metadata-list
 
-  semantic-version [--if-error] -> SemanticVersion?:
-    //return semantic-version
-    exception := catch :
-      // Delegate to the throwing overload so the real work lives in ONE place.
-      return semantic-version
-
-    if exception:
-      return if-error.call exception
-    return null
+  semantic-version -> SemanticVersion?:
+    return semantic-version --if-error=(:throw it)
 
   split-semver_ semver/string:
     plus-index := semver.index-of "+"

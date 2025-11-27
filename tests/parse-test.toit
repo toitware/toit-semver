@@ -144,9 +144,10 @@ main:
 
 test tests/List:
   tests.do: | entry/List |
+    //print "Testing $entry"
     result := ""
     a := entry[0]
     expected := entry[1]
     actual := (SemanticVersion.parse a --accept-missing-minor --accept-missing-patch --accept-leading-zeros --accept-version-core-zero --if-error=(: null))
 
-    expect-equals expected actual
+    expect-equals expected (actual != null)

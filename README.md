@@ -156,7 +156,7 @@ Comparison operators are shown in the example below.
 
   // prints "3.10.1-beta.1".
   // (Note that the v was dropped during parsing.)
-  print string-g
+  print semver-g
 ```
 
 #### Simple comparison
