@@ -2,9 +2,11 @@ import semver show *
 import expect show *
 
 main:
-  // More than one pre-release, and a build-metadata.  The strings are the same
-  // just order of pre-release and build metadata is different. Parser should
-  // create the same object in both cases.  This code tests that it does.
+  // More than one pre-release, and a build-metadata.  The strings are the same,
+  // however, the order of pre-release and build metadata is different.
+  // The parser should create the same object in both cases.
+
+  // Initial strings, with order difference
   str1 := "1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f"
   str2 := "1.4.0+sha.a8d9d4f-build.3928-build.3928-build.3928"
   semver-parsed1 := SemanticVersion.parse str1
