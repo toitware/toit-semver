@@ -67,10 +67,10 @@ only two operators - `precedes` and `equals`.  "Precedes" can be thought of as "
 | Logical Comparison | How in this package | Notes |
 | - | - | - |
 | `a == b` | `a.equals b` | Whilst Semver requires `build-metadata` to be ignored when performing comparisons, this code will see versions with different metadata as different. |
-| `a < b`  | `a.precedes b` | `a` is a lower version than `b` |
-| `a <= b` | `not b.precedes a` |
-| `a > b`  | `b.precedes a` |
-| `a >= b` | `not a.precedes b` |
+| `a < b`  | `a.precedes b` | `a` comes before `b`. |
+| `a <= b` | `not b.precedes a` | `b` does not come before `a` - e.g. could also be 'equal'. |
+| `a > b`  | `b.precedes a` | `b` comes before `a`. |
+| `a >= b` | `not a.precedes b` | `b` comes before `a` - e.g. could also be 'equal'. |
 
 
 ### Practical Examples
