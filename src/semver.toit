@@ -263,7 +263,7 @@ class SemanticVersion:
   // well as pre-release lists.
   static compare-lists_ l1/List l2/List -> int:
     // If both are empty, then they are the same. (or should we throw?)
-    if (l2.size == 0) and (l1.size == 0): return 0
+    if l2.size == 0 and l1.size == 0: return 0
 
     // Considering version-core is guarded from being empty in the constructor
     // then we treat empty lists as if they were pre-releases, and then per
@@ -435,7 +435,7 @@ class SemanticVersionTxtParser_:
     build-metadata-string := ""
     if plus-index != -1:
       build-metadata-string = builder[plus-index + 1..plus-end]
-      if build-metadata-string.size < 1:
+      if build-metadata-string == "":
         return if-error.call "'+' supplied, but no string follows."
 
       if not is-valid-build-metadata_ build-metadata-string:
@@ -446,7 +446,7 @@ class SemanticVersionTxtParser_:
     pre-releases-string := ""
     if minus-index != -1:
       pre-releases-string = builder[minus-index + 1..minus-end]
-      if pre-releases-string.size < 1:
+      if pre-releases-string == "":
         return if-error.call "'-' supplied, but no string follows."
       if not is-valid-prerelease_ pre-releases-string:
         return if-error.call "Invalid pre-release string '$pre-releases-string'."

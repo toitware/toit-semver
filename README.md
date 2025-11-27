@@ -190,17 +190,23 @@ left-hand precedes the right-hand side; 0 if they are equal, and 1
 otherwise.
 ```toit
   // Create strings
-  v1 := "1.0.0"
-  v1-beta := "1.0.0-beta.1"
+  str-core := "1.0.0"
+  str-pre-release := "1.0.0-beta.1"
+  str-build-metadata := "1.0.0-beta.1+build.82f4c8f"
 
   // Compare the two strings. Prints "Compare is: 1".
-  print "Compare is: $(compare v1 v1-beta)"
+  print "Compare is: $(compare str-core str-pre-release)"
 
   // Compare two strings: prints "Compare is: -1"
-  print "Compare is: $(compare v1-beta v1)"
+  print "Compare is: $(compare str-pre-release str-core)"
 
   // Compare two strings: prints "Compare is: 0"
-  print "Compare is: $(compare v1 v1)"
+  print "Compare is: $(compare str-pre-release str-pre-release)"
+
+  str-build-metadata-2 := "1.0.0-beta.1+build.f72ae1a"
+
+  // Compare two strings: prints "Compare is: 0"
+  print "Compare is: $(compare str-build-metadata str-build-metadata-2)"
 ```
 
 ## Modifying parsing rules
