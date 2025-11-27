@@ -110,7 +110,7 @@ MANGLED ::= [
   ["1.4.0-0", PASS],     // Pre-release starts with non alpha.
   ["1.4.0-", FAIL],      // Nothing after -.
   ["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS], // More than one pre-release.
-  ["1.4.0-build.3928-build.3928+sha.3928+sha.a8d9d4f", FAIL],   // More than one build-metadata.
+  ["1.4.0-build.3928-build.3928+sha.3928+sha.a8d9d4f", FAIL],   // Only one build-metadata allowed.
   ["1.4.0-build.3928-bu.3-bu.sdsd+s928+sa.4f", FAIL],           // More than one of both.
   ["1.4.0-build.3928-bu.3+s928-bu.sdsd+sa.4f", FAIL],           // Alternating - pre-release first.
   ["1.4.0-build.3928+s928-bu.sdsd-bu.3+sa.4f", FAIL],           // Alternating - build-metadata first.

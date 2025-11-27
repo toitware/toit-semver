@@ -192,7 +192,7 @@ class SemanticVersion:
       --accept-missing-patch=accept-missing-patch
       --accept-leading-zeros=accept-leading-zeros
       --accept-v=accept-v).semantic-version
-      --if-error=(: throw "PARSE_ERROR")
+      --if-error=(: throw "PARSE_ERROR: $it")
     return parsed
 
 
@@ -421,30 +421,43 @@ class SemanticVersionTxtParser_:
     pre-releases-list := []
     build-metadata-list := []
 
-    // Split off build-metadata and validate.  A subsequent '+'' will be text.
+    // Determine start/finish position references for build-metadata and pre-releases.
     plus-index := builder.index-of "+"
+    minus-index := builder.index-of "-"
+    plus-end := 0
+    minus-end := 0
+    if plus-index > minus-index:
+      plus-end = builder.size
+      minus-end = plus-index
+    else: // plus-index < minus-index
+      minus-end = builder.size
+      plus-end = minus-index
+
+    // Split off build-metadata and validate.  A subsequent '+' is not allowed.
+    build-metadata-string := ""
     if plus-index != -1:
-      build-metadata-string := builder[plus-index + 1..]
+      build-metadata-string = builder[plus-index + 1..plus-end]
       if build-metadata-string.size < 1:
         return if-error.call "'+' supplied, but no string follows."
 
       if not is-valid-build-metadata_ build-metadata-string:
         return if-error.call "Build-metadata string '$build-metadata-string' invalid."
       build-metadata-list = build-metadata-string.split "."
-      builder = builder[..plus-index]
 
     // Split off pre-releases and validate.  A subsequent '-' will be text.
-    minus-index := builder.index-of "-"
+    pre-releases-string := ""
     if minus-index != -1:
-      pre-releases-string := builder[minus-index + 1..]
+      pre-releases-string = builder[minus-index + 1..minus-end]
       if pre-releases-string.size < 1:
         return if-error.call "'-' supplied, but no string follows."
       if not is-valid-prerelease_ pre-releases-string:
         return if-error.call "Invalid pre-release string '$pre-releases-string'."
       pre-releases-list = pre-releases-string.split "."
-      builder = builder[..minus-index]
 
-    // Split version numbers.  Check for non zero.
+    builder = builder.replace "+$build-metadata-string" ""
+    builder = builder.replace "-$pre-releases-string" ""
+
+    // Split remaining text as the version numbers.  Check for non zero.
     version-core-list = builder.split "."
 
     // Check list length and fix.

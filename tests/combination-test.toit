@@ -2,32 +2,40 @@ import semver show *
 import expect show *
 
 main:
-  h := "1.0.0-beta.2"
-  i := "1.0.0-beta.a.2"
+  // More than one pre-release, and a build-metadata.  The strings are the same
+  // just order of pre-release and build metadata is different. Parser should
+  // create the same object in both cases.  This code tests that it does.
+  str1 := "1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f"
+  str2 := "1.4.0+sha.a8d9d4f-build.3928-build.3928-build.3928"
+  semver-parsed1 := SemanticVersion.parse str1
+  semver-parsed2 := SemanticVersion.parse str2
 
-  //["1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f", PASS], // More than one pre-release.
-  //["1.4.0-build.3928-build.3928+sha.3928+sha.a8d9d4f", FAIL],   // More than one build-metadata.
+  // test that the string->object->stringify comes back to the what it began as
+  expect-equals str1 "$semver-parsed1"
 
-  semver-h := SemanticVersion.parse h
-  semver-i := SemanticVersion.parse i
-
-  semver-j1 := SemanticVersion 1 4 0 --pre-releases=["build.3928","build.3928","build.3928"] --build-metadata=["sha.a8d9d4f"]
-  semver-j2 := SemanticVersion 1 4 0 --pre-releases=["build","3928-build","3928-build","3928"] --build-metadata=["sha.a8d9d4f"]
-  semver-j3 := SemanticVersion.parse "1.4.0-build.3928-build.3928-build.3928+sha.a8d9d4f"
+  // Expect that to fail in str2 case: stringify always puts the build-
+  // metadata last).
+  expect-not-equals str2 "$semver-parsed2"
 
 
+  // Create the object manually in the way we expect it to be parsed:
+  semver-test := SemanticVersion 1 4 0 --pre-releases=["build","3928-build","3928-build","3928"] --build-metadata=["sha", "a8d9d4f"]
 
-  semver-k := SemanticVersion.parse "1.4.0-build.3928-build.3928+sha.a8d9d4f-build.3928"
+  // Text reconstruction and comparison of the object test:
+  expect-equals "$semver-test" "$semver-parsed1"
 
-  print semver-h
-  print semver-i
-  print
-  print (semver-i.compare-to semver-h)
+  // Object 'obj.equals' comparison
+  expect (semver-parsed1.equals semver-test)
 
-  print semver-j3
-  print semver-j1
-  print semver-j2
-  print (semver-j3.equals semver-j2)
-  print (semver-j3.equals semver-j1)
+  // Test that the string->object->stringify comes back to the what it began as.
+  // - Expect str1 to be equal to parsed+restored-str2: its the same.
+  expect-equals str1 "$semver-parsed2"
 
-  print semver-k
+  // semver-test1 - using the same test - fields are the same, just ordered differently
+  // Text reconstruction comparison fails as strings returned in fixed order by object
+  expect-equals "$semver-test" "$semver-parsed2"
+  expect-equals "$semver-test" "$semver-parsed1"
+
+  expect (semver-test.equals semver-parsed2)
+  expect (semver-test.equals semver-parsed1)
+  expect (semver-parsed1.equals semver-parsed2)
