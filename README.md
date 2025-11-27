@@ -87,7 +87,7 @@ The following examples show these principles in practice:
 | `"1.2.3-beta+abcd" equals "1.2.3-beta+ef01"` | `false` | Whilst build-metadata should not used when comparing, the build-metadata numbers differ, and therefore are not the same. |
 | `"1.2.3-beta+sha.0beef" precedes "1.2.3-beta+sha.80081"` | `false` | Build-metadata is not used when comparing. |
 
-## Library Usage
+## Library Usage Examples
 #### Creating the object directly
 Imports the library, and creates a `SemanticVersion` object directly.
 ```toit
