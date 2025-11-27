@@ -261,8 +261,6 @@ class SemanticVersion:
 
   // Compare two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
-  //
-  // todo: test removing the comparisons at the top.
   static compare-lists_ l1/List l2/List -> int:
     // If both are empty, then they are the same. (or should we throw?)
     if (l2.size == 0) and (l1.size == 0): return 0
@@ -271,40 +269,40 @@ class SemanticVersion:
     // then we treat empty lists as if they were pre-releases, and then per
     // semver rules.  eg, If there is a prerelease list on one and not the
     // other, then the one without a pre-release list is greater.
-    if l2.size == 0: return -1   // (l1.size must be > 0 from earlier).
-    if l1.size == 0: return 1  // (l2.size must be > 0 from earlier).
+    if l2.size == 0 and l1.size != 0: return -1
+    if l1.size == 0 and l2.size != 0: return 1
 
     l1.size.repeat: | i/int |
       // No matching cell in L2 to compare with L1.
       if l2.size < (i + 1) : return 1
+      l1-i := l1[i]
+      l2-i := l2[i]
 
       // One string and one int:  Numeric always less than a string.
-      l1-numeric := (is-numeric_ l1[i])
-      l2-numeric := (is-numeric_ l2[i])
+      l1-numeric := (is-numeric_ l1-i)
+      l2-numeric := (is-numeric_ l2-i)
       if l1-numeric and not l2-numeric: return -1
       if l2-numeric and not l1-numeric: return 1
 
       // Both are lexical: use Toit compare-to.
       if (not l1-numeric) and (not l2-numeric):
-        str-compare := (l1[i].compare-to l2[i])
+        str-compare := (l1-i.compare-to l2-i)
         if str-compare != 0: return str-compare
         // Must be == at this point, continue to next loop.
 
       // Both must be numeric: force string to int and compare.
       if l1-numeric and l2-numeric:
-        l1-int := force-int_ l1[i]
-        l2-int := force-int_ l2[i]
+        l1-int := force-int_ l1-i
+        l2-int := force-int_ l2-i
         if l1-int < l2-int: return -1
         if l1-int > l2-int: return 1
 
       // Must be l1[it] == l2[it] continue to next loop.
 
-    // At this point, we've got to the end of L1, there may be more L2 left.
-    // Therefore at L1 is < L2, and therefore this must be true.
+    // We are now at the end of L1. See if there are more L2 left:
     if l1.size < l2.size: return -1
 
-    // Any other case:
-    //print "We got to the very end. aren't they equal?"
+    // Any other case - got to the end and they must be equal.
     return 0
 
   /**
