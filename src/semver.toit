@@ -86,7 +86,7 @@ compare input-a/string input-b/string  [--if-error] -> int
 /**
 Compare two semantic version strings.
 
-Variant allowing custom action block for `--if-equal`. See `$is-valid` for
+Variant allowing custom action block for `--if-equal`. See $is-valid for
   an explanation of the boolean parameters.
 */
 compare input-a/string input-b/string [--if-equal] -> int
