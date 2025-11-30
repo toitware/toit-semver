@@ -175,7 +175,7 @@ class SemanticVersion:
 
   Variant will throw if input can't be parsed.
 
-  Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+  Accepts parameters for flexibility on some parsing rules. See $is-valid for
     explanation of the boolean parameters.
   */
   static parse input/string -> SemanticVersion
