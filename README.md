@@ -169,7 +169,7 @@ otherwise.  `precedes` and `equals` produce boolean results.
   semver-i := SemanticVersion 2 5 10
 
   // Compare two objects with output: prints "1.20.3 compare-to 2.5.10 is -1."
-  print "$semver-h compare-to $semver-i is $((semver-h.compare-to semver-i))."
+  print "$semver-h compare-to $semver-i is $(semver-h.compare-to semver-i)."
 
   // Compare two objects: prints "true"
   print "$(semver-h.precedes semver-i)"
