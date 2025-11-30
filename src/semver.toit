@@ -468,7 +468,7 @@ class SemanticVersionTxtParser_:
       version-core-list.add "0"
       minor-added = true
 
-    if (version-core-list.size == 2):
+    if version-core-list.size == 2:
       if not accept-missing-patch and not minor-added:
         return if-error.call "Missing patch."
       version-core-list.add "0"
