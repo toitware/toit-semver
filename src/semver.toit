@@ -41,7 +41,7 @@ is-valid input/string -> bool
   return true
 
 /**
-Compare two semantic version strings.
+Compares two semantic version strings.
 
 For convenience and backwards compatibility, it is possible to compare two
   strings directly.
