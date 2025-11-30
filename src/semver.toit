@@ -9,7 +9,7 @@ See https://semver.org/ for details.
 */
 
 /**
-Determines if a semantic version string is valid against semver 2.0.0.
+Determines if a semantic version string is valid according to semver 2.0.0.
 
 This function accepts parameters as defined in README.md:
 - If `$accept-version-core-zero` is true, then 0.0.0 will be accepted for
