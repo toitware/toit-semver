@@ -26,7 +26,7 @@ main:
   // Text reconstruction and comparison of the object test:
   expect-equals "$semver-test" "$semver-parsed1"
 
-  // Object 'obj.equals' comparison
+  // Object 'obj.equals' comparison.
   expect (semver-parsed1.equals semver-test)
 
   // Test that the string->object->stringify comes back to the what it began as.
