@@ -462,7 +462,7 @@ class SemanticVersionTxtParser_:
       return if-error.call "Too many parts in version-core."
 
     minor-added := false
-    if (version-core-list.size == 1):
+    if version-core-list.size == :
       if not accept-missing-minor:
         return if-error.call "Missing minor."
       version-core-list.add "0"
