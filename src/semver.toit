@@ -44,12 +44,11 @@ is-valid input/string -> bool
 Compare two semantic version strings.
 
 For convenience and backwards compatibility, it is possible to compare two
-  strings directly. In the background the library creates the corresponding
-  `SemanticVersion` instances and uses them for comparison.
+  strings directly.
 
 Similar to all `compare-to` functions the `compare` function returns -1 if the
   left-hand side is less than the right-hand side; 0 if they are equal, and 1
-  otherwise.  On errors, returns `null`.
+  otherwise.
 
 Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
   explanation of the boolean parameters.
@@ -259,7 +258,7 @@ class SemanticVersion:
   patch -> int: return version-core[2]
 
 
-  // Compare two lists using semver rules.  Works for version-core lists, as
+  // Compares two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
   static compare-lists_ l1/List l2/List -> int:
     // If both are empty, then they are the same. (or should we throw?)
