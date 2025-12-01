@@ -213,7 +213,7 @@ class SemanticVersion:
       throw "Version-core contains non-numeric."
 
     // Check all of version-core are > 0.
-    if (version-core.any: not it < 0):
+    if (version-core.any: it < 0):
       throw "Version-core contains a negative number."
 
     // Check all of version-core are non-zero.
@@ -233,7 +233,7 @@ class SemanticVersion:
     version-core = [major, minor, patch]
 
     // Check all of version-core are > 0.
-    if (version-core.any: not it < 0):
+    if (version-core.any: it < 0):
       throw "Version-core contains negative numbers."
 
     // Check all of version-core are non-zero.
