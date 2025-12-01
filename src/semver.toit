@@ -208,11 +208,15 @@ class SemanticVersion:
       --.build-metadata/List=[]
       --accept-version-core-zero/bool=false:
 
+    // Check version core is not > 3.
+    if version-core.size != 3:
+      throw "Version-core list size is not 3."
+
     // Check all of version-core are ints.
     if (version-core.any: not it is int):
       throw "Version-core contains non-numeric."
 
-    // Check all of version-core are > 0.
+    // Check all of version-core are > 0.  If it > int.MAX, it becomes negative.
     if (version-core.any: it < 0):
       throw "Version-core contains a negative number."
 
@@ -238,7 +242,7 @@ class SemanticVersion:
 
     // Check all of version-core are non-zero.
     if not accept-version-core-zero and not (version-core.any: it > 0):
-      throw "Version-core are all zero. (Constructor.)"
+      throw "Version-core are all zero."
 
   // Constructor with no checks, for use with parser.
   constructor.private_ --.version-core/List=[0, 0, 0]
@@ -495,6 +499,11 @@ class SemanticVersionTxtParser_:
       digits := it
       version-core-ints.add (int.parse digits
         --if-error=: return if-error.call "Version number '$(digits)' is not an integer.")
+
+    // Check for negative ints (if a version core is > int.MAX, the result is
+    // not a throw, but negative integer.
+    if (version-core-ints.any: it < 0):
+      return if-error.call "Version-core contains a negative number."
 
     // Check all of version-core are non-zero.
     if not accept-version-core-zero:

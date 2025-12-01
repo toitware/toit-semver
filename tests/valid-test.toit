@@ -79,7 +79,16 @@ main:
   expect (semver.is-valid "1.0.00" --accept-leading-zeros)
   expect (semver.is-valid "1.0-a-z.A-Z.0-9.00" --accept-missing-patch --accept-leading-zeros)
 
-  // Check that explicity created objects (eg, not parsed) are created properly
+  // Check that explicity created objects throw if created improperly.
   expect-throw "Version-core contains negative numbers." (: semver.SemanticVersion 1 -2 3)
-  expect-throw "Version-core are all zero. (Constructor.)" (: semver.SemanticVersion 0 0 0)
+  expect-throw "Version-core contains negative numbers." (: semver.SemanticVersion -1 2 3)
+  expect-throw "Version-core contains negative numbers." (: semver.SemanticVersion 1 2 -3)
+  expect-throw "Version-core contains negative numbers." (: semver.SemanticVersion (int.MAX + 1) 2 3)
+  expect-throw "Version-core are all zero." (: semver.SemanticVersion 0 0 0)
+  expect-throw "Version-core are all zero." (: semver.SemanticVersion --version-core=[0, 0, 0])
+  expect-throw "Version-core list size is not 3." (: semver.SemanticVersion --version-core=[0, 0, 0, 0])
+  expect-throw "Version-core list size is not 3." (: semver.SemanticVersion --version-core=[0])
   expect-throw "Version-core contains non-numeric." (: semver.SemanticVersion --version-core=[1, "a", 3])
+
+  // Check that explicity created objects (eg, not parsed) are created properly.
+  expect-no-throw (: a := semver.SemanticVersion --version-core=[1, 2, 3] --pre-releases=["beta"] --build-metadata=["exp", "sha", "5114f85"])
