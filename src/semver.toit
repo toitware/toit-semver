@@ -347,8 +347,10 @@ class SemanticVersion:
 
   This variant returns true/false if this object is equal to $other.
 
-  Build-metadata comparison is `true` by default so that different builds of the
-    same version identifier are not considered equal.
+  Semver standard requires build-metadata is not considered when comparing,
+    however, it is not explicit in the `equals` case.  This function will return
+    `false` if the version/pre-release versions are the same, but build-metadata
+    is different.
   */
   equals other/SemanticVersion -> bool:
     return (compare-to other --compare-build-metadata=true) == 0
