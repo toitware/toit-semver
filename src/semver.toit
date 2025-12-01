@@ -67,8 +67,8 @@ compare input-a/string input-b/string -> int
 /**
 Variant of $(compare a b).
 
-This variant takes an `--if-error` block which is called if either input can't
-  be parsed.  See $compare.
+Takes an additional $if-error block argument. This variant takes an $if-error
+  block which is called if either input can't  be parsed.  See $compare.
 */
 compare input-a/string input-b/string  [--if-error] -> int
     --accept-version-core-zero/bool=false
@@ -88,8 +88,8 @@ compare input-a/string input-b/string  [--if-error] -> int
 /**
 Variant of $(compare a b).
 
-Calls the given $if-equal block if $input-a and $input-b compare as equal.
-  See $compare.
+Takes an additional $if-equal block argument.  Calls the given $if-equal block
+  if $input-a and $input-b compare as equal.  See $compare.
 */
 compare input-a/string input-b/string [--if-equal] -> int
     --accept-version-core-zero/bool=false
@@ -109,9 +109,11 @@ compare input-a/string input-b/string [--if-equal] -> int
 /**
 Variant of $(compare a b).
 
+Takes additional $if-equal and $if-error block arguments.
+
 Calls the given $if-equal block if $input-a and $input-b compare as equal.
 
-Calls $if-error if either input can't be parsed.
+Calls $if-error block if either input can't be parsed.
 
 Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
   explanation of the boolean parameters.
@@ -148,34 +150,9 @@ class SemanticVersion:
   build-metadata/List
 
   /**
-  Parses the supplied string into a SemanticVersion object.
+  Parses the supplied string creating a SemanticVersion object.
 
-  Calls the supplied $if-error block if input can't be parsed.
-
-  Accepts parameters for flexibility on some parsing rules. See $is-valid for
-    explanation of the boolean parameters.
-  */
-  static parse input/string  -> SemanticVersion?
-      --accept-version-core-zero/bool=false
-      --accept-missing-minor/bool=false
-      --accept-missing-patch/bool=false
-      --accept-leading-zeros/bool=false
-      --accept-v/bool=false
-      [--if-error]:
-
-    parsed := (SemanticVersionTxtParser_ input
-      --accept-version-core-zero=accept-version-core-zero
-      --accept-missing-minor=accept-missing-minor
-      --accept-missing-patch=accept-missing-patch
-      --accept-leading-zeros=accept-leading-zeros
-      --accept-v=accept-v).semantic-version
-      --if-error=if-error
-    return parsed
-
-  /**
-  Parses the supplied string into a SemanticVersion object.
-
-  Variant will throw if input can't be parsed.
+  Will throw if input can't be parsed.
 
   Accepts parameters for flexibility on some parsing rules. See $is-valid for
     explanation of the boolean parameters.
@@ -196,6 +173,30 @@ class SemanticVersion:
       --if-error=(: throw "PARSE_ERROR: $it")
     return parsed
 
+  /**
+  Variant of $parse.
+
+  Accepts an additional $if-error block parameter.  Calls the supplied
+    $if-error block if input can't be parsed.
+
+  See $parse.
+  */
+  static parse input/string  -> SemanticVersion?
+      --accept-version-core-zero/bool=false
+      --accept-missing-minor/bool=false
+      --accept-missing-patch/bool=false
+      --accept-leading-zeros/bool=false
+      --accept-v/bool=false
+      [--if-error]:
+
+    parsed := (SemanticVersionTxtParser_ input
+      --accept-version-core-zero=accept-version-core-zero
+      --accept-missing-minor=accept-missing-minor
+      --accept-missing-patch=accept-missing-patch
+      --accept-leading-zeros=accept-leading-zeros
+      --accept-v=accept-v).semantic-version
+      --if-error=if-error
+    return parsed
 
   /**
   Constructs a SemanticVersion from a $version-core.
@@ -213,7 +214,7 @@ class SemanticVersion:
 
     // Check all of version-core are > 0.
     if (version-core.any: not it < 0):
-      throw "Version-core contains negative numbers."
+      throw "Version-core contains a negative number."
 
     // Check all of version-core are non-zero.
     if not accept-version-core-zero and not (version-core.any: it > 0):
