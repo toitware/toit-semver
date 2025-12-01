@@ -221,9 +221,10 @@ class SemanticVersion:
       throw "Version-core are all zero."
 
   /**
-  Constructs a SemanticVersion object.
+  Variant of constructor creating a SemanticVersion object.
 
-  Must be provided in this order: major then minor then patch.
+  Accepts $major, $minor, and $patch as separate arguments instead of a List.
+    See $constructor.
   */
   constructor major/int minor/int=0 patch/int=0
       --.pre-releases/List=[]
