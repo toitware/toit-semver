@@ -24,7 +24,9 @@ main:
   semver-parsed1 := SemanticVersion.parse str1
   semver-parsed2 := SemanticVersion.parse str2
 
-  // test that the string->object->stringify comes back to the what it began as
+  // Test the process:
+  // - Original string parses to object.
+  // - Object stringify's back to original string.
   expect-equals str1 "$semver-parsed1"
 
   // Expect that to fail in str2 case: stringify always puts the build-
