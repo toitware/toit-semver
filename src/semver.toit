@@ -489,9 +489,9 @@ class SemanticVersionTxtParser_:
         return if-error.call "Missing patch."
       version-core-list.add "0"
 
-    // Now there are three.  Check each for $accept-leading-zeros
+    // Now there are three.  Check each version-core for $accept-leading-zeros
     version-core-list.do:
-      if (it.size > 1) and (it[0] == "0") and (not accept-leading-zeros):
+      if (it.size > 1) and (it[0] == '0') and (not accept-leading-zeros):
         return if-error.call "Leading zeros in version-core part '$it'."
 
     // Convert to ints.

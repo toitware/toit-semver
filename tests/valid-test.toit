@@ -63,3 +63,11 @@ main:
 
   expect-not (semver.is-valid "v1.0.0")
   expect-not (semver.is-valid "v1")
+
+  // Explicit tests for leading zeros.
+  expect-not (semver.is-valid "0100.0.0")
+  expect-not (semver.is-valid "100.00.0")
+  expect-not (semver.is-valid "100.0.00")
+  expect (semver.is-valid "01.0.0" --accept-leading-zeros)
+  expect (semver.is-valid "1.00.0" --accept-leading-zeros)
+  expect (semver.is-valid "1.0.00" --accept-leading-zeros)
