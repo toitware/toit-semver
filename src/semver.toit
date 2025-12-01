@@ -406,6 +406,8 @@ class SemanticVersionTxtParser_:
       --.accept-missing-patch/bool=false
       --.accept-leading-zeros=false
       --.accept-v=false:
+    if accept-missing-minor:
+      accept-missing-patch = true
 
   semantic-version [--if-error] -> SemanticVersion?:
     builder := source
