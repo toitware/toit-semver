@@ -498,7 +498,7 @@ class SemanticVersionTxtParser_:
     version-core-list.do:
       digits := it
       version-core-ints.add (int.parse digits
-        --if-error=: return if-error.call "Version number '$(digits)' is not an integer.")
+        --if-error=: return if-error.call "Version number '$(digits)' is not an int64.")
 
     // Check for negative ints (if a version core is > int.MAX, the result is
     // not a throw, but negative integer.
