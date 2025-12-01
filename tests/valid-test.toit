@@ -79,7 +79,11 @@ main:
   // directly and check the throw, and not just boolean on $is-valid.)
   expect-throw "PARSE_ERROR: Version number '9223372036854775808' is not an int64." (: semver.SemanticVersion.parse "1.9223372036854775808.0")
 
+  // Semver does not allow a second + after the first one, for build-metadata.
+  expect-throw "PARSE_ERROR: Build-metadata string 'build.1+build.2' is invalid." (: semver.SemanticVersion.parse "1.0.0-+build.1+build.2")
 
+  // Throws because of the leading zero.
+  expect-throw "PARSE_ERROR: Pre-release string 'a-z.A-Z.0-9.00' is invalid." (: semver.SemanticVersion.parse "1.0.0-a-z.A-Z.0-9.00")
 
   // Explicit tests for leading zeros.
   expect-not (semver.is-valid "0100.0.0")

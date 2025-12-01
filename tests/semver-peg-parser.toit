@@ -8,8 +8,10 @@ import semver show *
 
 /**
 Original PEG based semver parser, using only as a test benchmark.
-
 */
+
+main:
+  // unused
 
 class SemanticVersionPEGParser extends parser.PegParserBase_:
   accept-missing-minor/bool
