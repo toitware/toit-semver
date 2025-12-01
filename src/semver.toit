@@ -42,11 +42,11 @@ Compares two semantic version strings.
 For convenience and backwards compatibility, it is possible to compare two
   strings directly.
 
-Similar to all `compare-to` functions the `compare` function returns -1 if the
+Similar to all `compare-to` functions the $compare function returns -1 if the
   left-hand side is less than the right-hand side; 0 if they are equal, and 1
   otherwise.
 
-Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+Accepts parameters for flexibility on some parsing rules. See $is-valid for
   explanation of the boolean parameters.
 */
 compare input-a/string input-b/string -> int
@@ -115,7 +115,7 @@ Calls the given $if-equal block if $input-a and $input-b compare as equal.
 
 Calls $if-error block if either input can't be parsed.
 
-Accepts parameters for flexibility on some parsing rules. See `$is-valid` for
+Accepts parameters for flexibility on some parsing rules. See $is-valid for
   explanation of the boolean parameters.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error] -> int
@@ -322,16 +322,16 @@ class SemanticVersion:
   Returns -1 if the left-hand side is less than the right-hand side; 0 if they
     are equal, and 1 otherwise. The comparison is done using semver semantics.
 
-  If `--compare-build-metadata` is set to true, the rules used for `pre-releases`
+  If $compare-build-metadata is set to true, the rules used for $pre-releases
     are also applied to $build-metadata.
   */
   compare-to other/SemanticVersion --compare-build-metadata=false -> int:
     return compare-to other --compare-build-metadata=compare-build-metadata --if-equal=: 0
 
   /**
-  Variant of `$compare-to b`.
+  Variant of $(compare-to other).
 
-  This variant allows custom action block for `--if-equal`.  See $compare-to.
+  This variant allows custom action block for $if-equal.  See $compare-to.
   */
   compare-to other/SemanticVersion --compare-build-metadata=false [--if-equal] -> int:
     return compare-lists_ this.version-core other.version-core --if-equal=(:
@@ -342,7 +342,7 @@ class SemanticVersion:
           if-equal.call))
 
   /**
-  A convenience method for `$compare-to b == 0`.
+  A convenience method for $(compare-to other) == 0.
 
   This variant returns true/false if this object is equal to $other.  See
     $compare-to.
@@ -353,10 +353,10 @@ class SemanticVersion:
     is different.
   */
   equals other/SemanticVersion -> bool:
-    return (compare-to other --compare-build-metadata=true) == 0
+    return (compare-to other --compare-build-metadata) == 0
 
   /**
-  A convenience method for `$compare-to b < 0`.
+  A convenience method for $(compare-to other) < 0.
 
   This variant returns true/false if this object comes before $other.  If they
     are equal, this function will return false.  See $compare-to.
@@ -423,7 +423,7 @@ class SemanticVersionTxtParser_:
     if accept-missing-minor:
       accept-missing-patch = true
 
-  // Function parses the supplied string.  Runs the `--if-error` block if there
+  // Function parses the supplied string.  Calls the $if-error block if there
   // are parsing errors.
   semantic-version [--if-error] -> SemanticVersion?:
     builder := source
@@ -508,7 +508,7 @@ class SemanticVersionTxtParser_:
       --pre-releases=pre-releases-list
       --build-metadata=build-metadata-list
 
-  // Variant throws errors instead of running an `--if-error` block.
+  // Variant throws errors instead of calling a supplied $if-error block.
   semantic-version -> SemanticVersion?:
     return semantic-version --if-error=(:throw it)
 
