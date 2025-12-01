@@ -210,14 +210,13 @@ class SemanticVersion:
     if (version-core.any: not it is int):
       throw "Version-core contains non-numeric."
 
+    // Check all of version-core are > 0.
+    if (version-core.any: not it < 0):
+      throw "Version-core contains negative numbers."
+
     // Check all of version-core are non-zero.
     if not accept-version-core-zero and not (version-core.any: it > 0):
       throw "Version-core are all zero."
-
-  // Constructor with no checks, for use with parser.
-  constructor.private_ --.version-core/List=[0, 0, 0]
-      --.pre-releases/List=[]
-      --.build-metadata/List=[]:
 
   /**
   Constructs a SemanticVersion object.
@@ -230,9 +229,18 @@ class SemanticVersion:
       --accept-version-core-zero/bool=false:
     version-core = [major, minor, patch]
 
+    // Check all of version-core are > 0.
+    if (version-core.any: not it < 0):
+      throw "Version-core contains negative numbers."
+
     // Check all of version-core are non-zero.
     if not accept-version-core-zero and not (version-core.any: it > 0):
       throw "Version-core are all zero. (Constructor.)"
+
+  // Constructor with no checks, for use with parser.
+  constructor.private_ --.version-core/List=[0, 0, 0]
+      --.pre-releases/List=[]
+      --.build-metadata/List=[]:
 
   /**
   Creates a copy of the object with supplied properties changed.
