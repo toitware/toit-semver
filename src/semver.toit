@@ -453,10 +453,10 @@ class SemanticVersionTxtParser_:
     if plus-index != -1:
       build-metadata-string = builder[plus-index + 1..plus-end]
       if build-metadata-string == "":
-        return if-error.call "'+' supplied, but no string follows."
+        return if-error.call "Separator '+' is supplied, but no string follows."
 
       if not is-valid-build-metadata_ build-metadata-string:
-        return if-error.call "Build-metadata string '$build-metadata-string' invalid."
+        return if-error.call "Build-metadata string '$build-metadata-string' is invalid."
       build-metadata-list = build-metadata-string.split "."
 
     // Split off pre-releases and validate.  A subsequent '-' will be text.
@@ -464,9 +464,9 @@ class SemanticVersionTxtParser_:
     if minus-index != -1:
       pre-releases-string = builder[minus-index + 1..minus-end]
       if pre-releases-string == "":
-        return if-error.call "'-' supplied, but no string follows."
+        return if-error.call "Separator '-' is supplied, but no string follows."
       if not is-valid-prerelease_ pre-releases-string:
-        return if-error.call "Invalid pre-release string '$pre-releases-string'."
+        return if-error.call "Pre-release string '$pre-releases-string' is invalid."
       pre-releases-list = pre-releases-string.split "."
 
     builder = builder.replace "+$build-metadata-string" ""
@@ -482,26 +482,26 @@ class SemanticVersionTxtParser_:
     minor-added := false
     if version-core-list.size == 1:
       if not accept-missing-minor:
-        return if-error.call "Missing minor."
+        return if-error.call "Minor is missing."
       version-core-list.add "0"
       minor-added = true
 
     if version-core-list.size == 2:
       if not accept-missing-patch and not minor-added:
-        return if-error.call "Missing patch."
+        return if-error.call "Patch is missing."
       version-core-list.add "0"
 
     // Now there are three.  Check each version-core for $accept-leading-zeros
     version-core-list.do:
       if (it.size > 1) and (it[0] == '0') and (not accept-leading-zeros):
-        return if-error.call "Leading zeros in version-core part '$it'."
+        return if-error.call "Illegal leading zeros in version-core part '$it'."
 
     // Convert to ints.
     version-core-ints := []
     version-core-list.do:
       digits := it
       version-core-ints.add (int.parse digits
-        --if-error=: return if-error.call "Version number '$(digits)' not an integer.")
+        --if-error=: return if-error.call "Version number '$(digits)' is not an integer.")
 
     // Check all of version-core are non-zero.
     if not accept-version-core-zero:
