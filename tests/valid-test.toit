@@ -78,3 +78,8 @@ main:
   expect (semver.is-valid "1.00.0" --accept-leading-zeros)
   expect (semver.is-valid "1.0.00" --accept-leading-zeros)
   expect (semver.is-valid "1.0-a-z.A-Z.0-9.00" --accept-missing-patch --accept-leading-zeros)
+
+  // Check that explicity created objects (eg, not parsed) are created properly
+  expect-throw "Version-core contains negative numbers." (: semver.SemanticVersion 1 -2 3)
+  expect-throw "Version-core are all zero. (Constructor.)" (: semver.SemanticVersion 0 0 0)
+  expect-throw "Version-core contains non-numeric." (: semver.SemanticVersion --version-core=[1, "a", 3])
