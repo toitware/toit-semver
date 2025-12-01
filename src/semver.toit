@@ -68,7 +68,7 @@ compare input-a/string input-b/string -> int
 Variant of $(compare a b).
 
 This variant takes an `--if-error` block which is called if either input can't
-  be parsed.
+  be parsed.  See $compare.
 */
 compare input-a/string input-b/string  [--if-error] -> int
     --accept-version-core-zero/bool=false
@@ -89,6 +89,7 @@ compare input-a/string input-b/string  [--if-error] -> int
 Variant of $(compare a b).
 
 Calls the given $if-equal block if $input-a and $input-b compare as equal.
+  See $compare.
 */
 compare input-a/string input-b/string [--if-equal] -> int
     --accept-version-core-zero/bool=false
@@ -269,9 +270,9 @@ class SemanticVersion:
 
   // Compares two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
-  static compare-lists_ l1/List l2/List -> int:
+  static compare-lists_ l1/List l2/List [--if-equal] -> int:
     // If both are empty, then they are the same. (or should we throw?)
-    if l2.size == 0 and l1.size == 0: return 0
+    if l2.size == 0 and l1.size == 0: return if-equal.call
 
     // Considering version-core is guarded from being empty in the constructor
     // then we treat empty lists as if they were pre-releases, and then per
@@ -311,14 +312,13 @@ class SemanticVersion:
     if l1.size < l2.size: return -1
 
     // Any other case - got to the end and they must be equal.
-    return 0
+    return if-equal.call
 
   /**
-  Compares this object to another semantic version.
+  Compares this object to another semantic version object.
 
-  Similar to all `compare-to` functions the `compare` function returns -1 if the
-    left-hand side is less than the right-hand side; 0 if they are equal, and 1
-    otherwise.
+  Returns -1 if the left-hand side is less than the right-hand side; 0 if they
+    are equal, and 1 otherwise. The comparison is done using semver semantics.
 
   If `--compare-build-metadata` is set to true, the rules used for `pre-releases`
     are also applied to $build-metadata.
@@ -329,31 +329,21 @@ class SemanticVersion:
   /**
   Variant of `$compare-to b`.
 
-  This variant allows custom action block for `--if-equal`.
+  This variant allows custom action block for `--if-equal`.  See $compare-to.
   */
   compare-to other/SemanticVersion --compare-build-metadata=false [--if-equal] -> int:
-    version-core-compare := compare-lists_ this.version-core other.version-core
-    //print "- - comparing $(this.version-core) and $(other.version-core) == $version-core-compare"
-    if version-core-compare != 0:
-      return version-core-compare
-
-    pre-releases-compare := compare-lists_ this.pre-releases other.pre-releases
-    //print "- - comparing $(this.pre-releases) and $(other.pre-releases) == $pre-releases-compare"
-    if pre-releases-compare != 0:
-      return pre-releases-compare
-
-    if compare-build-metadata:
-      build-metadata-compare := compare-lists_ this.build-metadata other.build-metadata
-      //print "- - comparing $(this.build-metadata) and $(other.build-metadata) == $build-metadata-compare"
-      if build-metadata-compare != 0:
-        return build-metadata-compare
-
-    return if-equal.call
+    return compare-lists_ this.version-core other.version-core --if-equal=(:
+      compare-lists_ this.pre-releases other.pre-releases --if-equal=(:
+        if compare-build-metadata:
+          compare-lists_ this.build-metadata other.build-metadata --if-equal=if-equal
+        else:
+          if-equal.call))
 
   /**
   A convenience method for `$compare-to b == 0`.
 
-  This variant returns true/false if this object is equal to $other.
+  This variant returns true/false if this object is equal to $other.  See
+    $compare-to.
 
   Semver standard requires build-metadata is not considered when comparing,
     however, it is not explicit in the `equals` case.  This function will return
@@ -367,7 +357,7 @@ class SemanticVersion:
   A convenience method for `$compare-to b < 0`.
 
   This variant returns true/false if this object comes before $other.  If they
-    are equal, this function will return false.
+    are equal, this function will return false.  See $compare-to.
   */
   precedes other/SemanticVersion -> bool:
     return (compare-to other) < 0
