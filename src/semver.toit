@@ -567,5 +567,6 @@ class SemanticVersionTxtParser_:
       part.do:
         if not is-digit_ it: only-digits = false
         if not is-identifier-character_ it: return false
-      if only-digits and part.size > 1 and part[0] == '0': return false
+      if only-digits and part.size > 1 and part[0] == '0' and not accept-leading-zeros:
+        return false
     return true

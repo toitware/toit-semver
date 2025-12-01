@@ -77,3 +77,4 @@ main:
   expect (semver.is-valid "01.0.0" --accept-leading-zeros)
   expect (semver.is-valid "1.00.0" --accept-leading-zeros)
   expect (semver.is-valid "1.0.00" --accept-leading-zeros)
+  expect (semver.is-valid "1.0-a-z.A-Z.0-9.00" --accept-missing-patch --accept-leading-zeros)
