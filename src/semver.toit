@@ -444,11 +444,8 @@ class SemanticVersionTxtParser_:
     pre-releases-list := []
     build-metadata-list := []
 
-    // Determine start position references for build-metadata and pre-releases.
-    plus-index := builder.index-of "+"
-    minus-index := builder.index-of "-"
-
     // Split off build-metadata and validate.  A subsequent '+' is not allowed.
+    plus-index := builder.index-of "+"
     build-metadata-string := ""
     if plus-index != -1:
       build-metadata-string = builder[plus-index + 1..]
@@ -463,6 +460,7 @@ class SemanticVersionTxtParser_:
       builder = builder.replace "+$build-metadata-string" ""
 
     // Split off pre-releases and validate.  A subsequent '-' will be text.
+    minus-index := builder.index-of "-"
     pre-releases-string := ""
     if minus-index != -1:
       pre-releases-string = builder[minus-index + 1..]
