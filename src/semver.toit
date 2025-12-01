@@ -211,7 +211,7 @@ class SemanticVersion:
       throw "Version-core contains non-numeric."
 
     // Check all of version-core are non-zero.
-    if accept-version-core-zero and not (version-core.any: it > 0):
+    if not accept-version-core-zero and not (version-core.any: it > 0):
       throw "Version-core are all zero."
 
   // Constructor with no checks, for use with parser.
@@ -231,7 +231,7 @@ class SemanticVersion:
     version-core = [major, minor, patch]
 
     // Check all of version-core are non-zero.
-    if accept-version-core-zero and not (version-core.any: it > 0):
+    if not accept-version-core-zero and not (version-core.any: it > 0):
       throw "Version-core are all zero. (Constructor.)"
 
   /**
