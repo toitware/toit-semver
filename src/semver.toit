@@ -273,13 +273,13 @@ class SemanticVersion:
   // Compares two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
   static compare-lists_ l1/List l2/List [--if-equal] -> int:
-    // If both are empty, then they are the same. (or should we throw?)
+    // If both are empty, then they are the same.  Exit early.
     if l2.size == 0 and l1.size == 0: return if-equal.call
 
     // Considering version-core is guarded from being empty in the constructor
     // then we treat empty lists as if they were pre-releases, and then per
     // semver rules.  eg, If there is a prerelease list on one and not the
-    // other, then the one without a pre-release list is greater.
+    // other, then the one *without* a pre-release list is greater.
     if l2.size == 0 and l1.size != 0: return -1
     if l1.size == 0 and l2.size != 0: return 1
 
