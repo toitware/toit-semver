@@ -11,17 +11,13 @@ See https://semver.org/ for details.
 /**
 Determines if a semantic version string is valid according to semver 2.0.0.
 
-This function accepts parameters as defined in README.md:
-- If `$accept-version-core-zero` is true, then 0.0.0 will be accepted for
-the version core.
-- If `$accept-missing-minor` is true, then accepts version numbers without minor
-(and patch), like `1`.
-- If `$accept-missing-patch` is true, then accepts version numbers without
-patch, like `1.2`.
-- If `$accept-v` is true, version numbers are accepted with the preceeding v,
-like `v1.2.1`.
-- If `$accept-leading-zeros` is true, version numbers are accepted that have
-leading zeros in front of them, like `1.02.3`.
+If `$accept-version-core-zero` is true, then 0.0.0 will be accepted for the version core.
+If `$accept-missing-minor` is true, then accepts version numbers without minor
+  (and patch), like `1`.
+If `$accept-missing-patch` is true, then accepts version numbers without patch, like `1.2`.
+If `$accept-v` is true, version numbers are accepted with the preceding v, like `v1.2.1`.
+If `$accept-leading-zeros` is true, version numbers are accepted that have
+  leading zeros in front of them, like `1.02.3`.
 */
 is-valid input/string -> bool
     --accept-version-core-zero/bool=false
