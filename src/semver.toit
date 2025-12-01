@@ -444,22 +444,14 @@ class SemanticVersionTxtParser_:
     pre-releases-list := []
     build-metadata-list := []
 
-    // Determine start/finish position references for build-metadata and pre-releases.
+    // Determine start position references for build-metadata and pre-releases.
     plus-index := builder.index-of "+"
     minus-index := builder.index-of "-"
-    plus-end := 0
-    minus-end := 0
-    if plus-index > minus-index:
-      plus-end = builder.size
-      minus-end = plus-index
-    else: // plus-index < minus-index
-      minus-end = builder.size
-      plus-end = minus-index
 
     // Split off build-metadata and validate.  A subsequent '+' is not allowed.
     build-metadata-string := ""
     if plus-index != -1:
-      build-metadata-string = builder[plus-index + 1..plus-end]
+      build-metadata-string = builder[plus-index + 1..]
       if build-metadata-string == "":
         return if-error.call "Separator '+' is supplied, but no string follows."
 
@@ -467,18 +459,21 @@ class SemanticVersionTxtParser_:
         return if-error.call "Build-metadata string '$build-metadata-string' is invalid."
       build-metadata-list = build-metadata-string.split "."
 
+      // Remove build-metadata from builder.
+      builder = builder.replace "+$build-metadata-string" ""
+
     // Split off pre-releases and validate.  A subsequent '-' will be text.
     pre-releases-string := ""
     if minus-index != -1:
-      pre-releases-string = builder[minus-index + 1..minus-end]
+      pre-releases-string = builder[minus-index + 1..]
       if pre-releases-string == "":
         return if-error.call "Separator '-' is supplied, but no string follows."
       if not is-valid-prerelease_ pre-releases-string:
         return if-error.call "Pre-release string '$pre-releases-string' is invalid."
       pre-releases-list = pre-releases-string.split "."
 
-    builder = builder.replace "+$build-metadata-string" ""
-    builder = builder.replace "-$pre-releases-string" ""
+      // Remove pre-releases string from builder.
+      builder = builder.replace "-$pre-releases-string" ""
 
     // Split remaining text as the version numbers.  Check for non zero.
     version-core-list = builder.split "."

@@ -13,15 +13,19 @@ main:
   expect (semver.is-valid "1.0.0-x.7.z.92")
   expect (semver.is-valid "1.0.0-alpha+001")
   expect (semver.is-valid "1.0.0+20130313144700")
-  expect (semver.is-valid "1.0.0+a-z.A-Z.0-9.00")
-  expect (semver.is-valid "1.0.0-beta+a-z.A-Z.0-9.00")
+  expect (semver.is-valid "1.0.0-9.0+a-z.A-Z.0")
+  expect (semver.is-valid "1.0.0+a-z.A-Z.0-9.0")
   expect (semver.is-valid "1.0.0-a-z.A-Z.0-9.0")
+
+  // Leading zero in pre-release field
+  expect-not (semver.is-valid "1.0.0-9.00+a-z.A-Z.0")
   expect (semver.is-valid "1.0.0-beta+exp.sha.5114f85")
   expect (semver.is-valid "1.0.0-alpha.1-1")
   expect (semver.is-valid "1.0.0-alpha-1")
   expect (semver.is-valid "1.0.0-rc.1+build.1")
   expect (semver.is-valid "1.0.0-01-0")
   expect (semver.is-valid "1.0.0---+---")
+  expect (semver.is-valid "1.0.0-beta+a-z.A-Z.0-9.00")
 
   expect-not (semver.is-valid "1")
   expect (semver.is-valid "1" --accept-missing-minor)
@@ -48,7 +52,9 @@ main:
 
   expect (semver.is-valid "1" --accept-missing-minor)
   expect-not (semver.is-valid "1")
-  expect-not (semver.is-valid "1.2" --accept-missing-minor)
+
+  // This is allowed as --accept-missing-minor implies --accept-missing-patch.
+  expect (semver.is-valid "1.2" --accept-missing-minor)
   expect (semver.is-valid "1.2" --accept-missing-patch)
   expect (semver.is-valid "1.2.3" --accept-missing-minor)
 
