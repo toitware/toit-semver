@@ -23,7 +23,6 @@ TESTS ::= [
 main:
   expect-equals 0 (semver.compare TESTS[0] TESTS[0])
 
-  /*
   for i := 1; i < TESTS.size; i++:
     a := TESTS[i - 1]
     b := TESTS[i]
@@ -31,7 +30,6 @@ main:
     expect-equals -1 (semver.compare a b)
     expect-equals 1 (semver.compare b a)
     expect-equals 0 (semver.compare b b)
-  */
 
   // Various arbitrary text comparisons.
   expect-equals 1 (semver.compare "1.0.0" "1.0.0" --if-equal=: 1)

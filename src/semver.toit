@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Toitware Contributors.
+// Copyright (C) 2025 Toit contributors.
 // Use of this source code is governed by an MIT-style license that can be found
 // in the LICENSE file.
 
@@ -11,12 +11,12 @@ See https://semver.org/ for details.
 /**
 Determines if a semantic version string is valid according to semver 2.0.0.
 
-If `$accept-version-core-zero` is true, then 0.0.0 will be accepted for the version core.
+If `$accept-version-core-zero` is true, then accepts 0.0.0 for the version core.
 If `$accept-missing-minor` is true, then accepts version numbers without minor
   (and patch), like `1`.
 If `$accept-missing-patch` is true, then accepts version numbers without patch, like `1.2`.
-If `$accept-v` is true, version numbers are accepted with the preceding v, like `v1.2.1`.
-If `$accept-leading-zeros` is true, version numbers are accepted that have
+If `$accept-v` is true, then accepts version numbers with the preceding v, like `v1.2.1`.
+If `$accept-leading-zeros` is true, then accepts version numbers that have
   leading zeros in front of them, like `1.02.3`.
 */
 is-valid input/string -> bool
@@ -37,10 +37,7 @@ is-valid input/string -> bool
   return true
 
 /**
-Compares two semantic version strings.
-
-For convenience and backwards compatibility, it is possible to compare two
-  strings directly.
+Compares two semantic version strings $input-a and $input-b.
 
 Similar to all `compare-to` functions the $compare function returns -1 if the
   left-hand side is less than the right-hand side; 0 if they are equal, and 1
@@ -48,6 +45,10 @@ Similar to all `compare-to` functions the $compare function returns -1 if the
 
 Accepts parameters for flexibility on some parsing rules. See $is-valid for
   explanation of the boolean parameters.
+
+If $input-a or $input-b is used multiple times, consider using the
+  $SemanticVersion.parse function to parse it once, and then use the
+  $SemanticVersion.compare-to function to compare the parsed objects.
 */
 compare input-a/string input-b/string -> int
     --accept-version-core-zero/bool=false
@@ -67,8 +68,8 @@ compare input-a/string input-b/string -> int
 /**
 Variant of $(compare a b).
 
-Takes an additional $if-error block argument. This variant takes an $if-error
-  block which is called if either input can't  be parsed.  See $compare.
+Takes an additional $if-error block argument which is called
+  if either input can't be parsed.
 */
 compare input-a/string input-b/string  [--if-error] -> int
     --accept-version-core-zero/bool=false
@@ -88,8 +89,8 @@ compare input-a/string input-b/string  [--if-error] -> int
 /**
 Variant of $(compare a b).
 
-Takes an additional $if-equal block argument.  Calls the given $if-equal block
-  if $input-a and $input-b compare as equal.  See $compare.
+Takes an additional $if-equal block argument which is called if
+  $input-a and $input-b compare as equal.
 */
 compare input-a/string input-b/string [--if-equal] -> int
     --accept-version-core-zero/bool=false
@@ -112,11 +113,7 @@ Variant of $(compare a b).
 Takes additional $if-equal and $if-error block arguments.
 
 Calls the given $if-equal block if $input-a and $input-b compare as equal.
-
 Calls $if-error block if either input can't be parsed.
-
-Accepts parameters for flexibility on some parsing rules. See $is-valid for
-  explanation of the boolean parameters.
 */
 compare input-a/string input-b/string [--if-equal] [--if-error] -> int
     --accept-version-core-zero/bool=false
@@ -144,18 +141,30 @@ compare input-a/string input-b/string [--if-equal] [--if-error] -> int
 
   return a.compare-to b --if-equal=if-equal
 
+/**
+A semantic version object.
+*/
 class SemanticVersion:
+  /** The version core triplet. */
   version-core/List
+
+  /**
+  The pre-release identifiers.
+  The list is empty if there are no pre-releases.
+  */
   pre-releases/List
+  /**
+  The build-metadata identifiers.
+  The list is empty if there is no build-metadata.
+  */
   build-metadata/List
 
   /**
-  Parses the supplied string creating a SemanticVersion object.
+  Parses the supplied $input string.
 
-  Will throw if input can't be parsed.
+  Throws if the $input can't be parsed.
 
-  Accepts parameters for flexibility on some parsing rules. See $is-valid for
-    explanation of the boolean parameters.
+  See $is-valid for explanation of the boolean parameters.
   */
   static parse input/string -> SemanticVersion
       --accept-version-core-zero/bool=false
@@ -164,22 +173,19 @@ class SemanticVersion:
       --accept-leading-zeros/bool=false
       --accept-v/bool=false:
 
-    parsed := (SemanticVersionTxtParser_ input
+    return parse input
       --accept-version-core-zero=accept-version-core-zero
       --accept-missing-minor=accept-missing-minor
       --accept-missing-patch=accept-missing-patch
       --accept-leading-zeros=accept-leading-zeros
-      --accept-v=accept-v).semantic-version
+      --accept-v=accept-v
       --if-error=(: throw "PARSE_ERROR: $it")
-    return parsed
 
   /**
-  Variant of $parse.
+  Variant of $(parse input).
 
-  Accepts an additional $if-error block parameter.  Calls the supplied
-    $if-error block if input can't be parsed.
-
-  See $parse.
+  Accepts an additional $if-error block parameter which is called if
+    $input can't be parsed.
   */
   static parse input/string  -> SemanticVersion?
       --accept-version-core-zero/bool=false
@@ -189,19 +195,18 @@ class SemanticVersion:
       --accept-v/bool=false
       [--if-error]:
 
-    parsed := (SemanticVersionTxtParser_ input
-      --accept-version-core-zero=accept-version-core-zero
-      --accept-missing-minor=accept-missing-minor
-      --accept-missing-patch=accept-missing-patch
-      --accept-leading-zeros=accept-leading-zeros
-      --accept-v=accept-v).semantic-version
-      --if-error=if-error
-    return parsed
+    parser := SemanticVersionTxtParser_ input
+        --accept-version-core-zero=accept-version-core-zero
+        --accept-missing-minor=accept-missing-minor
+        --accept-missing-patch=accept-missing-patch
+        --accept-leading-zeros=accept-leading-zeros
+        --accept-v=accept-v
+    return parser.parse --if-error=if-error
 
   /**
-  Constructs a SemanticVersion from a $version-core.
-
-  Variant accepts $version-core as a List.
+  Variant of $(constructor major minor patch).
+  Accepts a $version-core triplet (list of three integers) instead of separate
+    major, minor, and patch integers.
   */
   constructor --.version-core/List=[0, 0, 0]
       --.pre-releases/List=[]
@@ -225,10 +230,7 @@ class SemanticVersion:
       throw "Version-core are all zero."
 
   /**
-  Variant of constructor creating a SemanticVersion object.
-
-  Accepts $major, $minor, and $patch as separate arguments instead of a List.
-    See $constructor.
+  Creates a SemanticVersion object.
   */
   constructor major/int minor/int=0 patch/int=0
       --.pre-releases/List=[]
@@ -253,10 +255,10 @@ class SemanticVersion:
   Creates a copy of the object with supplied properties changed.
   */
   with --major/int? = null -> SemanticVersion
-       --minor/int? = null
-       --patch/int? = null
-       --pre-release /List? = null
-       --build-metadata /List? = null:
+      --minor/int? = null
+      --patch/int? = null
+      --pre-release /List? = null
+      --build-metadata /List? = null:
     return SemanticVersion
         (major or this.version-core[0])
         (minor or this.version-core[1])
@@ -272,7 +274,6 @@ class SemanticVersion:
 
   /** The semver patch version number. */
   patch -> int: return version-core[2]
-
 
   // Compares two lists using semver rules.  Works for version-core lists, as
   // well as pre-release lists.
@@ -335,38 +336,31 @@ class SemanticVersion:
   /**
   Variant of $(compare-to other).
 
-  This variant allows custom action block for $if-equal.  See $compare-to.
+  This variant allows custom action block for $if-equal.
   */
   compare-to other/SemanticVersion --compare-build-metadata=false [--if-equal] -> int:
-    return compare-lists_ this.version-core other.version-core --if-equal=(:
-      compare-lists_ this.pre-releases other.pre-releases --if-equal=(:
+    return compare-lists_ this.version-core other.version-core --if-equal=:
+      compare-lists_ this.pre-releases other.pre-releases --if-equal=:
         if compare-build-metadata:
           compare-lists_ this.build-metadata other.build-metadata --if-equal=if-equal
         else:
-          if-equal.call))
+          if-equal.call
 
   /**
   A convenience method for $(compare-to other) == 0.
-
-  This variant returns true/false if this object is equal to $other.  See
-    $compare-to.
-
-  Semver standard requires build-metadata is not considered when comparing,
-    however, it is not explicit in the `equals` case.  This function will return
-    `false` if the version/pre-release versions are the same, but build-metadata
-    is different.
   */
   equals other/SemanticVersion -> bool:
-    return (compare-to other --compare-build-metadata) == 0
+    return (compare-to other) == 0
 
   /**
   A convenience method for $(compare-to other) < 0.
-
-  This variant returns true/false if this object comes before $other.  If they
-    are equal, this function will return false.  See $compare-to.
   */
   precedes other/SemanticVersion -> bool:
     return (compare-to other) < 0
+
+  operator== other/any -> bool:
+    if other is not SemanticVersion: return false
+    return (compare-to other --compare-build-metadata) == 0
 
   /**
   A string representation of the object.
@@ -429,7 +423,7 @@ class SemanticVersionTxtParser_:
 
   // Function parses the supplied string.  Calls the $if-error block if there
   // are parsing errors.
-  semantic-version [--if-error] -> SemanticVersion?:
+  parse [--if-error] -> SemanticVersion?:
     builder := source
     if builder.starts-with "v" or builder.starts-with "V":
       builder = source[1..]
@@ -516,10 +510,6 @@ class SemanticVersionTxtParser_:
       --version-core=version-core-ints
       --pre-releases=pre-releases-list
       --build-metadata=build-metadata-list
-
-  // Variant throws errors instead of calling a supplied $if-error block.
-  semantic-version -> SemanticVersion?:
-    return semantic-version --if-error=(:throw it)
 
   split-semver_ semver/string:
     plus-index := semver.index-of "+"
