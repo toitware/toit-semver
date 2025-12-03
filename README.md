@@ -60,17 +60,25 @@ See [`tests`](https://github.com/toitware/toit-semver/tree/main/tests) folder an
 
 ## Comparison operators
 When comparing versions, simple comparators, such as `<` or `>=`, can become
-confusing, especially where a lower major versions might recieve an update that
-is more recent than a higher major version.  For these reasons this code exposes
-only two operators - `precedes` and `equals`.  "Precedes" can be thought of as "comes before" in the versioning sequence.  The logic works in the following way:
+confusing, especially where pre-release and build-metadata are involved.  For example,
+`1.9.1` and `1.9.1+build.23` are equal according to Semver. At the same time, one
+would expect the `==` operator to return false when comparing these two versions.
 
-| Logical Comparison | How in this package | Notes |
+For this reason `SemanticVersion` opbjects only expose four comparison methods:
+1. `compare-to`: returns -1, 0, 1, similar to other `compare-to` functions in Toit.
+2. `precedes`: returns true if the left-hand side version comes before the right-hand
+  side version.
+3. `equals`: returns true if the two versions are equal according to Semver rules (thus
+  excluding build-metadata).
+4. `==`: returns true if the two versions are exactly the same, including build-metadata.
+
+| Semver Comparison | How in this package | Notes |
 | - | - | - |
-| `a == b` | `a.equals b` | Whilst Semver requires `build-metadata` to be ignored when performing comparisons, this code will see versions with different metadata as different. |
+| `a == b` | `a.equals b` | `a` and `b` represent the same Semver version. |
 | `a < b`  | `a.precedes b` | `a` comes before `b`. |
-| `a <= b` | `not b.precedes a` | `b` does not come before `a` - e.g. could also be 'equal'. |
-| `a > b`  | `b.precedes a` | `b` comes before `a`. |
-| `a >= b` | `not a.precedes b` | `b` comes before `a` - e.g. could also be 'equal'. |
+| `a <= b` | `not b.precedes a` | `a` comes before `b`, or `a` is equal to `b` according to Semver rules. |
+| `a > b`  | `b.precedes a` | `a` comes after `b`. |
+| `a >= b` | `not a.precedes b` | `a` comes after `b`, or `a` is equal to `b` according to Semver rules. |
 
 
 ### Practical Examples
@@ -84,7 +92,7 @@ The following examples show these principles in practice:
 | `"1.2.3-beta.2.1" precedes "1.2.3-beta.1"` | `false` | If all of the preceding identifiers are equal, integers will be compared the normal way. |
 | `"1.2.3-beta.2" precedes "1.2.3-beta.1"` | `false` | If all of the preceding identifiers are equal, integers must be compared the normal way. |
 | `"1.2.3-1" precedes "1.2.3-beta"` | `true` | Where strings and integers must be compared, strings have a higher precedence than integers. |
-| `"1.2.3-beta+abcd" equals "1.2.3-beta+ef01"` | `false` | Whilst build-metadata should not used when comparing, the build-metadata numbers differ, and therefore are not the same. |
+| `"1.2.3-beta+abcd" equals "1.2.3-beta+ef01"` | `true` | Build-metadata is not used when comparing. Note that the `==` operator would return false. |
 | `"1.2.3-beta+sha.0beef" precedes "1.2.3-beta+sha.80081"` | `false` | Build-metadata is not used when comparing. |
 
 ## Library Usage Examples
@@ -226,7 +234,7 @@ otherwise potentially cause code to crash/stop):
 Arguments can work in combination, as per the following examples:
 | Example combination | Result |
 | - | - |
-| `.parse "1" --accept-missing-patch` | Throws.  Paramters excuse the missing `patch`, therefore `minor` is still expected. |
+| `.parse "1" --accept-missing-patch` | Throws.  Parameters allow a missing `patch`, but the `minor` is still expected. |
 | `.parse "1" --accept-missing-patch --if-error=(: null)` | Invokes the `if-error` block since a `minor` is missing, thus returning `null`. |
 | `.parse 1.54` | In this case 1.2 is a `float`. Floats are not accepted for parsing due to ambiguities about how the decimal parts would be handled. |
 | `.parse "v1.2.3" --if-error=(: null)` | Will return `null`.  The presence of `V` would normally throw without `--accept-v`. |
